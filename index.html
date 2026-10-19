@@ -776,9 +776,9 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setT
 /* ---------- emailed report ---------- */
 // The server endpoint that emails the report. Until it exists, "Email me this report" becomes
 // "See my report": the preview opens straight away, to print, save as PDF or share by link.
-const REPORT_ENDPOINT = '';
+const REPORT_ENDPOINT = 'https://signupengine-roi-report.signupengine-roi-report.workers.dev/report';
 // Cloudflare Turnstile site key (public; the secret lives in the Worker). Proves a person sent the form.
-const TURNSTILE_SITE_KEY = '';
+const TURNSTILE_SITE_KEY = '0x4AAAAAAFbwr3gJwa7LMpFf';
 const rep = {type:'ltn', form:{}};
 // a real file, not a data: URI: Gmail and Outlook block data: images in email
 const SUE_LOGO = new URL('assets/signupengine-logo.png', location.href).href;
