@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SignUpEngine ROI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: inputs in one compact column on the left; on the right, a bottom-line card (return + bullet story) and one line chart with two tabs. */
+:root{
+  --bg:#f6f4f9; --surface:#ffffff; --ink:#221a2b; --muted:#675e73; --line:#e3dcea;
+  --purple:#75449A; --blue:#1A94BC; --tint:#efe6f6; --soft:#b99ad1; --yr:#2E8B6B;
+  --font:"Kumbh Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15111a; --surface:#1f1926; --ink:#f2edf7; --muted:#a89fb4; --line:#362d41;
+    --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15111a; --surface:#1f1926; --ink:#f2edf7; --muted:#a89fb4; --line:#362d41;
+  --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 48px}
+.wrap{max-width:1280px;margin:0 auto;display:grid;gap:18px}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap}
+.top-text{display:grid;gap:2px;min-width:0}
+h1{font-size:clamp(24px,2.8vw,32px);line-height:1.15;margin:0;font-weight:800;letter-spacing:-.01em}
+.top-text p{margin:0;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;max-width:100%}
+.tab{font:inherit;font-weight:600;font-size:14px;border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--purple);color:#fff}
+button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.main{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:960px){.main{grid-template-columns:minmax(0,1fr)}}
+
+/* inputs */
+.inputs{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 18px 16px;display:grid;min-width:0}
+.grp{display:grid;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.grp h2{margin:0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ctls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ctl{display:grid;gap:5px;align-content:start;min-width:0}
+.ctl label{font-size:13px;font-weight:600;color:var(--muted);line-height:1.25;min-height:2.5em;display:flex;align-items:flex-end}
+.num{display:flex;align-items:baseline;gap:2px;border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:var(--bg);font-variant-numeric:tabular-nums}
+.num:focus-within{outline:2px solid var(--blue);outline-offset:1px}
+.num input{font:inherit;font-size:18px;font-weight:800;color:var(--ink);background:transparent;border:0;width:100%;min-width:0;padding:0;-moz-appearance:textfield}
+.num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num input:focus-visible{outline:none}
+.num .aff{color:var(--muted);font-weight:700;font-size:14px}
+input[type=range]{width:100%;accent-color:var(--purple);margin:0;height:16px}
+.hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:-2px}
+.note{margin:0;font-size:13px;font-weight:600;background:var(--tint);border-radius:6px;padding:7px 10px;font-variant-numeric:tabular-nums}
+.ctable{display:grid;gap:6px;margin-top:2px}
+.trow{display:grid;grid-template-columns:72px repeat(3,minmax(0,1fr));gap:6px;align-items:center}
+.trow.th span{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;text-align:right;padding-right:8px}
+.trow.th span:first-child{text-align:left;padding-right:0}
+.trow .tl{font-size:13px;font-weight:700}
+.tnum{padding:4px 8px;justify-content:flex-end;gap:1px}
+.tnum input{font-size:16px;width:4.4ch;flex:none;text-align:right;field-sizing:content;min-width:1.2ch;max-width:100%}
+.tnum .aff{font-size:13px}
+.camp-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--tint);border-radius:8px;overflow:hidden}
+.camp-sum div{padding:9px 12px;display:grid;gap:1px}
+.camp-sum div + div{border-left:1px solid color-mix(in srgb,var(--purple) 18%,transparent)}
+.camp-sum b{font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.camp-sum span{font-size:12px;color:var(--muted);line-height:1.3}
+.hint-sm{margin:0;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.reset{font:inherit;font-size:13px;font-weight:600;color:var(--purple);background:none;border:0;padding:14px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+.ro{display:grid;gap:6px;padding:14px 0;border-bottom:1px solid var(--line)}
+.ro h3{margin:0;font-size:15px;display:flex;justify-content:flex-start;align-items:baseline;gap:12px}
+.ro dl{margin:0;display:grid;grid-template-columns:minmax(0,max-content) auto;justify-content:start;gap:4px 16px;font-size:14px}
+.ro-wrap{display:grid;grid-template-columns:minmax(0,1fr)}
+@media (max-width:960px){.ro-wrap{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));column-gap:28px}}
+.ro dt{color:var(--muted)} .ro dd{margin:0;font-weight:700;text-align:left;font-variant-numeric:tabular-nums}
+.ro-btn{font:inherit;font-size:13px;font-weight:600;color:var(--purple);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* results */
+.results{display:grid;gap:14px;min-width:0}
+.bottom{background:var(--purple);color:#fff;border-radius:14px;padding:20px 22px;display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:16px 26px;align-items:center;min-width:0}
+@media (max-width:700px){.bottom{grid-template-columns:minmax(0,1fr)}}
+.bottom .k-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.bottom .x{font-size:clamp(52px,6vw,72px);font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:4px 0}
+.bottom .x small{font-size:.34em;letter-spacing:0;margin-left:6px}
+.bottom .k-sub{font-size:14px;color:rgba(255,255,255,.88)}
+.ledger{display:grid;border-left:1px solid rgba(255,255,255,.25);padding-left:24px;min-width:0}
+@media (max-width:700px){.ledger{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.25);padding-top:12px}}
+.led-h{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85);padding-bottom:4px}
+.ledger .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.18);align-items:baseline}
+.ledger .lab{font-size:15px;font-weight:600;line-height:1.3;min-width:0}
+.ledger .lab small{display:block;font-size:13px;font-weight:400;color:rgba(255,255,255,.78);margin-top:1px}
+.ledger .lab small b{color:#fff;font-weight:700}
+.ledger .val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ledger .row.out .val{color:rgba(255,255,255,.85)}
+.ledger .row.total{border-bottom:0;border-top:2px solid #fff;margin-top:-1px;padding-top:9px}
+.ledger .row.total .lab{font-size:16px;font-weight:800}
+.ledger .row.total .val{font-size:24px}
+.bottom ul{margin:0;padding:0;list-style:none;display:grid;gap:9px;border-left:1px solid rgba(255,255,255,.25);padding-left:24px}
+@media (max-width:700px){.bottom ul{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.25);padding-top:14px}}
+.bottom li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;font-size:15px;line-height:1.4;color:rgba(255,255,255,.9)}
+.bottom li small{font-size:13px;color:rgba(255,255,255,.7)}
+.bottom li::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;margin-top:8px}
+.bottom li b{font-weight:800;color:#fff}
+
+.pwrap{display:grid;min-width:0}
+.ptabs{display:flex;gap:4px}
+.ptabs button{font:inherit;font-size:15px;font-weight:700;padding:10px 20px;border:0;border-radius:12px 12px 0 0;background:var(--tint);color:var(--purple);cursor:pointer}
+.ptabs button:hover{background:color-mix(in srgb,var(--purple) 22%,var(--tint))}
+.ptabs button[aria-pressed="true"]{background:var(--purple);color:#fff}
+.ptabs.inner{border-bottom:3px solid var(--purple);margin:4px 0 8px}
+.ptabs.inner button{font-size:14px;padding:8px 18px;border-radius:10px 10px 0 0}
+.ptabs.inner[hidden]{display:none}
+.pwrap .bottom{border-top-left-radius:0}
+.chart-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px 18px;display:grid;gap:12px;min-width:0}
+.chart-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px 16px;flex-wrap:wrap}
+.aha{margin:0;font-size:16px;font-weight:700;line-height:1.35;flex:1 1 240px}
+.cap{margin:-6px 0 2px;font-size:13px;color:var(--muted);line-height:1.45;font-variant-numeric:tabular-nums}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto}
+.seg button{font:inherit;font-size:14px;font-weight:600;border:0;background:var(--bg);color:var(--muted);padding:6px 16px;cursor:pointer;white-space:nowrap}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg.mini button{font-size:12px;padding:3px 10px}
+.seg.mode{width:100%}.seg.mode button{flex:1 1 0;padding:8px 6px;font-size:13px;white-space:normal}
+.seg.mode button[aria-pressed="true"]{background:var(--purple);color:#fff}
+.ctl.wide{grid-column:1/-1}
+.ctl.row{grid-column:1/-1;grid-template-columns:96px minmax(0,1fr);column-gap:12px;align-items:center}
+.ctl.row label{grid-column:1/-1;min-height:0}
+.ctl.row .hint{grid-column:1/-1}
+.ctl-head{display:flex;justify-content:space-between;align-items:flex-end;gap:6px 8px;flex-wrap:wrap}
+.ctl-head label{min-height:0}
+.cmp{display:grid;gap:18px;padding:6px 0 4px}
+.cmp-g{display:grid;gap:6px}
+.cmp-g.total{border-top:1px solid var(--line);padding-top:14px}
+.cmp-n,.cmp-r{display:grid;grid-template-columns:210px minmax(0,1fr);gap:10px;align-items:baseline}
+.cmp-n{font-size:14px;font-weight:700}
+.cmp-x{font-size:14px;font-weight:800;color:var(--purple);font-variant-numeric:tabular-nums}
+.cmp-x small{font-size:12px;font-weight:500;color:var(--muted);margin-left:6px}
+.cmp-r{align-items:center}
+@media (max-width:560px){.cmp-n,.cmp-r{grid-template-columns:minmax(0,1fr);gap:4px}}
+.cmp-l{font-size:13px;color:var(--muted)}
+.cmp-t{display:flex;align-items:center;gap:10px;min-width:0}
+.cmp-b{height:22px;border-radius:3px;max-width:calc(100% - 90px)}
+.cmp-v{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.chart{width:100%;height:auto;display:block}
+
+.cta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 20px;border-top:1px solid var(--line);padding:18px 2px 0;margin-top:4px;text-align:center}
+.cta p{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+.cta a{color:var(--purple);background:transparent;border:1.5px solid var(--purple);font-weight:700;font-size:14px;text-decoration:none;padding:8px 14px;border-radius:8px;white-space:nowrap}
+.cta a:hover{background:var(--tint)}
+.how{padding:2px 2px 0}
+.how h3{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.how ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:13px;color:var(--muted);line-height:1.45}
+.fine{margin:0;font-size:12px;color:var(--muted);max-width:115ch}
+/* report: sticky footer bar, request form, email preview */
+body{padding-bottom:110px}
+.rbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(34,26,43,.08);
+  padding:12px max(16px, env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px))}
+.rbar-in{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:10px 24px}
+.rbar p{margin:0;font-size:15px;font-weight:600;line-height:1.35}
+.rbar p span{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+.btn{font:inherit;font-size:15px;font-weight:700;border:0;border-radius:10px;background:var(--purple);color:#fff;padding:11px 20px;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--purple)}
+.lnk{font:inherit;font-size:14px;font-weight:600;color:var(--purple);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:640px){.rbar p{display:none}.rbar .btn{width:100%}}
+
+.ov{position:fixed;inset:0;z-index:60;background:rgba(21,17,26,.55);display:grid;place-items:center;padding:16px}
+.ov[hidden]{display:none}
+.rform{background:var(--surface);color:var(--ink);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 32px);overflow:auto;padding:22px 22px 20px;display:grid;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.rform-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.rform h2{margin:0;font-size:22px;font-weight:800;line-height:1.2}
+.rform-h p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.x-btn{font:inherit;font-size:22px;line-height:1;border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 4px}
+.fl{display:grid;gap:5px}
+.fl > span,.fl legend{font-size:13px;font-weight:700;color:var(--muted)}
+.fl input,.fl select,.fl textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+.fl textarea{resize:vertical;min-height:64px}
+.fl input:focus-visible,.fl select:focus-visible,.fl textarea:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.fl small{font-size:12px;color:var(--muted)}
+.fl.err input{border-color:#c0392b}
+.fl .msg{font-size:12px;color:#c0392b;display:none}.fl.err .msg{display:block}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.two{grid-template-columns:minmax(0,1fr)}}
+fieldset.fl{border:0;margin:0;padding:0}
+.pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pick label{position:relative;display:block;cursor:pointer}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick span{display:block;text-align:center;font-size:14px;font-weight:700;padding:10px 6px;border:1.5px solid var(--line);border-radius:10px;color:var(--muted);background:var(--bg)}
+.pick input:checked + span{border-color:var(--purple);background:var(--tint);color:var(--purple)}
+.pick input:focus-visible + span{outline:2px solid var(--blue);outline-offset:2px}
+.share{border:1px solid var(--line);border-radius:10px;padding:0}
+.share summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--purple);padding:11px 12px;list-style:none}
+.share summary::-webkit-details-marker{display:none}
+.share summary::before{content:"+";display:inline-block;width:16px;font-weight:800}
+.share[open] summary::before{content:"\2212"}
+.share-b{display:grid;gap:12px;padding:0 12px 12px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.chk input{margin-top:3px;accent-color:var(--purple)}
+.ex-warn{margin:0;font-size:13px;background:#fff7e0;color:#5a4a1a;border-radius:8px;padding:9px 12px}
+.ex-warn[hidden]{display:none}
+.rform-f{display:flex;justify-content:flex-end;align-items:center;gap:12px 20px;flex-wrap:wrap}
+
+/* preview */
+.pv{position:fixed;inset:0;z-index:70;background:#e9e5ee;overflow:auto;color:#221a2b}
+.pv[hidden]{display:none}
+.pv-bar{position:sticky;top:0;z-index:2;background:#ffffff;border-bottom:1px solid #e3dcea;padding:10px 16px}
+.pv-bar-in{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.pv-bar .seg{border-color:#e3dcea}.pv-bar .seg button{background:#f6f4f9;color:#675e73}.pv-bar .seg button + button{border-left-color:#e3dcea}
+.pv-bar .seg button[aria-pressed="true"]{background:#75449A;color:#fff}
+.pv-ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.pv-note{max-width:640px;margin:16px auto 0;font-size:13px;color:#675e73;padding:0 16px}
+.pv-note b{color:#221a2b}
+.pv .btn.ghost{color:#75449A;border-color:#75449A;padding:7px 14px;font-size:14px}
+@media (max-width:560px){.pv-ctl,.pv-bar .seg{width:100%}.pv-bar .seg button{flex:1 1 0;padding:7px 4px;font-size:13px;white-space:normal}.pv .btn.ghost{width:100%}
+  .em-tbl{font-size:13px}.em-tbl th{font-size:11px;white-space:normal}}
+
+/* the email itself: fixed light colors, as most inboxes render */
+.em{max-width:600px;margin:12px auto 40px;background:#ffffff;border-radius:6px;overflow:hidden;font-family:"Kumbh Sans",Arial,Helvetica,sans-serif;color:#221a2b;line-height:1.5;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.em *{box-sizing:border-box}
+.em-top{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;border-bottom:1px solid #eee8f3}
+.em-top img{height:30px;width:auto;display:block}
+.em-date{font-size:13px;color:#675e73}
+.em-body{padding:26px 28px 6px}
+.em-club{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#75449A;margin:0 0 6px}
+.em h1{font-size:26px;line-height:1.2;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+.em-for{margin:0;font-size:14px;color:#675e73}
+.em-sec{margin-top:24px;border:1px solid #e3dcea;border-radius:12px;overflow:hidden}
+.em-sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 18px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#675e73;background:#f6f4f9;border-bottom:1px solid #e3dcea}
+.em-sec-h span{font-size:12px;font-weight:700;letter-spacing:0;text-transform:none;color:#75449A}
+.em-hero{display:grid;grid-template-columns:1fr 1fr;background:#75449A;color:#fff}
+.em-hero > div{padding:18px}
+.em-hero > div + div{border-left:1px solid rgba(255,255,255,.25)}
+.em-hero .k{font-size:13px;color:rgba(255,255,255,.88)}
+.em-hero .big{font-size:42px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:2px 0;font-variant-numeric:tabular-nums}
+.em-hero .mid{font-size:30px;font-weight:800;line-height:1.15;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+.em-sec.next .em-hero{background:#efe6f6;color:#221a2b}
+.em-sec.next .em-hero .k{color:#675e73}
+.em-sec.next .em-hero .big{color:#75449A}
+.em-sec.next .em-hero > div + div{border-left-color:#d9c8e8}
+.em-pts{margin:0;padding:14px 18px 16px 36px;display:grid;gap:7px;font-size:15px}
+.em-pts li::marker{color:#75449A}
+.em-pts b{font-weight:800}
+.em-basis{margin-top:24px}
+.em-ex{margin:0 0 8px;font-size:13px;background:#fff7e0;border-radius:8px;padding:9px 12px;color:#5a4a1a}
+.em-basis h3 span{font-weight:600;color:#75449A;margin-left:8px;font-size:12px}
+.em-inv{padding:4px 18px 8px}
+.em-inv div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid #eee8f3;font-size:15px}
+.em-inv div span{font-weight:600}
+.em-inv div small{display:block;font-size:13px;font-weight:400;color:#675e73;margin-top:1px}
+.em-inv div b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.em-inv div.tot{border-bottom:0;border-top:2px solid #221a2b;margin-top:-1px;font-weight:800}
+.em-inv div.tot span{font-weight:800}
+.em-basis h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#675e73;margin:0 0 6px}
+.em-basis ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:13px;color:#675e73}
+.em-basis h3{font-size:13px;margin:10px 0 2px;color:#221a2b}
+.em-cta{margin:26px 0 8px;background:#f6f4f9;border-radius:12px;padding:20px;text-align:center}
+.em-cta p{margin:0 0 12px;font-size:15px;font-weight:600}
+.em-cta a.b{display:inline-block;background:#75449A;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:11px 22px;border-radius:8px}
+.em-cta a.l{display:block;margin-top:10px;font-size:13px;color:#75449A;font-weight:600}
+.em-foot{padding:14px 28px 24px;font-size:12px;color:#8a8196}
+.em-foot p{margin:0 0 6px}
+@media (max-width:560px){
+  .em-top,.em-body,.em-foot{padding-left:18px;padding-right:18px}
+  .em h1{font-size:22px}
+  .em-hero .big{font-size:36px}.em-hero .mid{font-size:24px}
+  .em-hero > div{padding:14px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div class="top">
+    <div class="top-text">
+      <h1>See what your program pays back</h1>
+      <p>Enter your club's numbers. Everything updates as you go.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Program">
+      <button class="tab" role="tab" data-tab="ltn">Adult beginners</button>
+      <button class="tab" role="tab" data-tab="camp">Summer camps</button>
+      <button class="tab" role="tab" data-tab="both">Both programs</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <section class="inputs" id="inputs" aria-label="Your numbers"></section>
+    <section class="results" aria-live="polite">
+      <div class="pwrap">
+        <div class="ptabs" role="group" aria-label="Time period">
+          <button type="button" data-period="1" aria-pressed="true">First 12 months</button>
+          <button type="button" data-period="2" aria-pressed="false">Next 12 months</button>
+        </div>
+        <div class="bottom" id="bottom"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-top">
+          <p class="aha" id="aha"></p>
+          <div class="seg" role="group" aria-label="Chart view">
+            <button type="button" data-view="money" aria-pressed="true">Money</button>
+            <button type="button" data-view="players" aria-pressed="false">Players</button>
+          </div>
+        </div>
+        <p class="cap" id="cap"></p>
+        <div class="legend" id="legend"></div>
+        <div class="ptabs inner" id="ptabs2" role="group" aria-label="Time period">
+          <button type="button" data-period="1" aria-pressed="true">First 12 months</button>
+          <button type="button" data-period="2" aria-pressed="false">Next 12 months</button>
+        </div>
+        <div id="chart"></div>
+      </div>
+      <div class="how" id="fine"></div>
+      <div class="cta"><p>Want to see this with your club's real numbers? We'll walk you through it in 15 minutes.</p><a href="https://signupengine.io" target="_blank" rel="noopener">Talk to SignUpEngine</a></div>
+    </section>
+  </div>
+</div>
+
+
+<div class="rbar" role="region" aria-label="Email this report">
+  <div class="rbar-in">
+    <p>Get these numbers as a report in your inbox<span>Ready to forward to your CEO, COO or colleagues.</span></p>
+    <button type="button" class="btn" id="open-report">Email me this report</button>
+  </div>
+</div>
+
+<div class="ov" id="report-ov" hidden>
+  <form class="rform" id="report-form" role="dialog" aria-modal="true" aria-labelledby="rf-title" novalidate>
+    <div class="rform-h">
+      <div><h2 id="rf-title">Email me this report</h2><p>Your numbers, laid out on one page, so you can share them with the people who decide.</p></div>
+      <button type="button" class="x-btn" data-close aria-label="Close">×</button>
+    </div>
+    <fieldset class="fl">
+      <legend>Which report?</legend>
+      <div class="pick">
+        <label><input type="radio" name="rtype" value="ltn"><span>Adult beginners</span></label>
+        <label><input type="radio" name="rtype" value="camp"><span>Summer camps</span></label>
+        <label><input type="radio" name="rtype" value="both"><span>Both programs</span></label>
+      </div>
+    </fieldset>
+    <div class="two">
+      <label class="fl" data-req><span>Your name</span><input name="name" autocomplete="name"><span class="msg">Please add your name.</span></label>
+      <label class="fl" data-req><span>Club name</span><input name="club" autocomplete="organization"><span class="msg">Please add your club.</span></label>
+    </div>
+    <div class="two">
+      <label class="fl" data-req data-email><span>Your email</span><input name="email" type="email" autocomplete="email"><span class="msg">Please add a valid email.</span></label>
+      <label class="fl"><span>Your role</span><select name="role"><option value="">Choose one (optional)</option><option>Director of Tennis</option><option>General Manager</option><option>COO</option><option>CEO or Owner</option><option>Program Director</option><option>Other</option></select></label>
+    </div>
+    <details class="share">
+      <summary>Also email it to your CEO, COO or colleagues</summary>
+      <div class="share-b">
+        <label class="fl"><span>Their email addresses</span><input name="cc" placeholder="ceo@yourclub.com, coo@yourclub.com"><small>Up to three, separated by commas. They get the same report, with your note at the top.</small></label>
+        <label class="fl"><span>A short note for them (optional)</span><textarea name="note" placeholder="This is the program I mentioned. Worth a look before our budget meeting."></textarea></label>
+      </div>
+    </details>
+    <label class="chk"><input type="checkbox" name="optin"> Send me occasional ideas for growing club programs. You can unsubscribe anytime.</label>
+    <p class="ex-warn" id="ex-warn" hidden>You're still using our example numbers, so the report will say so. Change them in the calculator first for a report about your club.</p>
+    <div class="rform-f">
+      <button type="button" class="lnk" id="just-preview">Preview the report first</button>
+      <button type="submit" class="btn">Send my report</button>
+    </div>
+  </form>
+</div>
+
+<div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="Report preview">
+  <div class="pv-bar"><div class="pv-bar-in">
+    <div class="pv-ctl">
+      <div class="seg" role="group" aria-label="Report">
+        <button type="button" data-rt="ltn">Adult beginners</button><button type="button" data-rt="camp">Summer camps</button><button type="button" data-rt="both">Both programs</button>
+      </div>
+    </div>
+    <button type="button" class="btn ghost" id="pv-close">Back to the calculator</button>
+  </div></div>
+  <p class="pv-note" id="pv-note"></p>
+  <div id="pv-email"></div>
+</div>
+
+<script>
+const MONTHS = 12;
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const PROGRAMS = {
+  ltn: {name:'Adult beginner program', who:'players', session:'session',
+    fields:[
+      {g:'p', key:'sessions', label:'Sessions per year', min:1, max:12, step:1},
+      {g:'p', key:'spots', label:'Spots per session (all class times)', min:0, max:400, step:5},
+      {g:'p', key:'full', label:'How full sessions get', min:0, max:100, step:5, suf:'%'},
+      {g:'p', key:'price', label:'Price', min:0, max:300, step:1, pre:'$'},
+      {g:'p', key:'friend', label:'Paying players who bring a free friend', min:0, max:100, step:5, suf:'%'},
+      {g:'c', key:'setup', label:'One-time setup', min:0, max:10000, step:50, pre:'$'},
+      {g:'c', key:'ads', label:'Digital ads per session', min:0, max:10000, step:50, pre:'$', hint:'Billed to your card by Meta or Google, not SignUpEngine'},
+      {g:'c', key:'fee', label:'SignUpEngine platform per month', min:0, max:3000, step:25, pre:'$', wide:true, hint:'Ad management, campaign monitoring, eblasts and registration support'},
+      {g:'s', key:'keep', label:'Keep playing after the program', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'s', key:'renew', label:'Of those, still playing next year', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'s', key:'spend', label:'What they spend', min:0, max:12000, step:50, pre:'$'}
+    ]},
+  camp: {name:'Summer camps', who:'campers', session:'camp week',
+    fields:[
+      {g:'x', key:'lastCampers', label:'Campers last summer', min:0, max:5000, step:5},
+      {g:'x', key:'lastRev', label:'Camp revenue last summer', min:0, max:3000000, step:1000, pre:'$'},
+      {g:'x', key:'growNow', label:'Camper growth this summer with SignUpEngine', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'p', key:'sessions', label:'Camp weeks per summer', min:1, max:14, step:1},
+      {g:'p', key:'wpc', label:'Average weeks per camper', min:1, max:14, step:0.1},
+      {g:'e', key:'early', label:'Sign up in January (early bird)', min:0, max:80, step:5, suf:'%', row:true},
+      {g:'t', key:'fspots', min:0, max:400, step:1}, {g:'t', key:'ffull', min:0, max:100, step:5}, {g:'t', key:'fprice', min:0, max:3000, step:5},
+      {g:'t', key:'hspots', min:0, max:400, step:1}, {g:'t', key:'hfull', min:0, max:100, step:5}, {g:'t', key:'hprice', min:0, max:3000, step:5},
+      {g:'c', key:'setup', label:'One-time setup', min:0, max:10000, step:50, pre:'$'},
+      {g:'c', key:'ads', label:'Digital ads for the season', min:0, max:20000, step:50, pre:'$', hint:'Billed to your card by Meta or Google, not SignUpEngine'},
+      {g:'c', key:'fee', label:'SignUpEngine platform per month', min:0, max:3000, step:25, pre:'$', wide:true, hint:'Ad management, campaign monitoring, eblasts and registration support'},
+      {g:'n', key:'grow', label:'Camp growth next season', min:0, max:50, step:1, suf:'%', row:true},
+      {g:'n', key:'back', label:'Campers who come back next summer', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'s', key:'keep', label:'Campers who join a year-round program', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'s', key:'renew', label:'Of those, still enrolled next year', min:0, max:100, step:5, suf:'%', row:true},
+      {g:'s', key:'spend', label:'What they spend', min:0, max:12000, step:50, pre:'$'}
+    ]}
+};
+const DEFAULTS = {
+  ltn:  {sessions:4,  spots:80, full:80, price:59,  friend:50, setup:1000, fee:600, ads:600,  keep:20, renew:70, spend:1200, spendMode:'year'},
+  camp: {sessions:10, wpc:1.7, fspots:40, ffull:85, fprice:585, hspots:24, hfull:70, hprice:350, early:40, grow:5, back:40, setup:1000, fee:795, ads:3000, keep:10, renew:70, spend:2400, spendMode:'year',
+          mode:'new', lastCampers:80, lastRev:128000, growNow:25}
+};
+const state = {tab:'ltn', view:'money', period:1, ltn:{...DEFAULTS.ltn}, camp:{...DEFAULTS.camp}};
+
+const $ = n => (n<0?'−$':'$') + Math.round(Math.abs(n)).toLocaleString('en-US');
+const int = n => Math.round(n).toLocaleString('en-US');
+const kfmt = n => n>=1000 ? '$'+(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,'')+'k' : '$'+Math.round(n);
+
+/* Year one. Program revenue and costs are averaged across the 12 months;
+   players who stay add to each month after their session. */
+/* Camps follow a calendar year: launch in January, registration and ads through August,
+   camp from mid-June, year-round families from September, planning next season in Nov-Dec. */
+const REG_MONTHS = 8;   // January through August
+// typical shape of registrations after January: steady through spring, tapering into the summer
+const REG_CURVE = [12,12,13,14,12,8,4];   // Feb..Aug
+function regProfile(early){
+  const e = Math.min(80, Math.max(0, early))/100, tot = REG_CURVE.reduce((a,b)=>a+b,0);
+  return [e, ...REG_CURVE.map(w=>(1-e)*w/tot), 0,0,0,0];
+}
+function calcCamp(v){
+  const period = state.period, p2 = period===2, existing = v.mode==='existing';
+  let fWk=0, hWk=0, fRegs=0, hRegs=0, weeks=0, sF=0, sH=0, thisPlayers, players, regRev, totalRev, per=0, added=0;
+  if(existing){
+    // a camp they already run: only growth over last summer counts toward the return
+    per = v.lastRev/Math.max(1, v.lastCampers);
+    thisPlayers = Math.round(v.lastCampers*(1+v.growNow/100));
+    players = p2 ? Math.round(thisPlayers*(1+v.grow/100)) : thisPlayers;
+    totalRev = players*per; regRev = totalRev - v.lastRev; added = players - v.lastCampers;
+  } else {
+    fWk = Math.round(v.fspots*v.ffull/100); hWk = Math.round(v.hspots*v.hfull/100);
+    fRegs = fWk*v.sessions; hRegs = hWk*v.sessions; weeks = fRegs+hRegs;
+    thisPlayers = Math.round(weeks/Math.max(1, v.wpc));          // this season's campers
+    // next season grows by the growth rate; returning families fill part of it
+    const g = p2 ? v.grow/100 : 0;
+    sF = p2 ? Math.round(fRegs*(1+g)) : fRegs; sH = p2 ? Math.round(hRegs*(1+g)) : hRegs;
+    players = p2 ? Math.round((sF+sH)/Math.max(1, v.wpc)) : thisPlayers;
+    regRev = sF*v.fprice + sH*v.hprice; totalRev = regRev;
+  }
+  const returning = p2 ? Math.min(players, Math.round(thisPlayers*v.back/100)) : 0, newCampers = players-returning;
+  const adsSeason = p2 ? v.ads*newCampers/Math.max(1,thisPlayers) : v.ads;   // ads only need to find new campers
+  const setup = p2 ? 0 : v.setup, feeYear = v.fee*MONTHS;
+  const cost = setup + feeYear + adsSeason;
+  // kids who join year-round programs; for an existing camp, only from the campers SignUpEngine added
+  const y1Stayers = (existing ? Math.max(0, thisPlayers - v.lastCampers) : thisPlayers)*v.keep/100;
+  const carry = p2 ? y1Stayers*v.renew/100 : 0;                // still enrolled a year later
+  const joinNew = existing ? (p2 ? Math.max(0, players - thisPlayers)*v.keep/100 : y1Stayers)
+    : (p2 ? newCampers : players)*v.keep/100;                  // new year-round families from this summer
+  const spendMo = v.spendMode==='month' ? v.spend : v.spend/12;
+  let cumP = 0;
+  const prof = regProfile(v.early);
+  const mo = Array.from({length:MONTHS}, (_,i)=>{
+    const reg = prof[i];
+    cumP += players*reg;
+    const stayers = carry + (i>=8 ? joinNew : 0);
+    return {players:cumP, campRev: regRev*reg, campTotal: totalRev*reg, campLast: existing ? v.lastRev*reg : 0, stayers, stay:stayers*spendMo,
+      inn: regRev*reg + stayers*spendMo,
+      cost: v.fee + adsSeason*reg + (i===0?setup:0)};
+  });
+  const stayYear = mo.reduce((a,x)=>a+x.stay,0);
+  const bands = [
+    {a:-0.5, b:4.5, label:'Registration opens'},
+    {a:4.5, b:7.5, label:'Camp + registration'},
+    {a:7.5, b:9.5, label:'Year-round'},
+    {a:9.5, b:11.5, label:'Plan ahead'}
+  ];
+  return {key:'camp', v, camp:true, existing, per, added, totalRev, lastRev:v.lastRev, lastCampers:v.lastCampers, campInfo:{fWk, hWk, fRegs, hRegs, weeks}, season:{fRegs:sF, hRegs:sH, weeks:sF+sH}, thisPlayers, marks:[], bands, period, setup, carry, y1Stayers,
+    perSession:fWk+hWk, players, paid:players, free:0, regRev, adsYear:adsSeason, adsSeason, feeYear, cost,
+    avgCost:(feeYear+adsSeason)/MONTHS, mo, stayYear, totalIn:regRev+stayYear,
+    stayersEnd: mo[MONTHS-1].stayers, stayEnd: mo[MONTHS-1].stay, returning, newCampers, joinNew};
+}
+function calc(key){
+  if(key==='camp') return calcCamp(state.camp);
+  const v = state[key], camp = false;
+  let perSession, players, paid, free, regRev, campInfo = null;
+  if(camp){
+    // camper-weeks for each option, then actual kids = camper-weeks / average weeks per camper
+    const fWk = Math.round(v.fspots*v.ffull/100), hWk = Math.round(v.hspots*v.hfull/100);
+    const fRegs = fWk*v.sessions, hRegs = hWk*v.sessions, weeks = fRegs+hRegs;
+    perSession = fWk+hWk;
+    players = Math.round(weeks/Math.max(1, v.wpc));
+    paid = players; free = 0;
+    regRev = fRegs*v.fprice + hRegs*v.hprice;
+    campInfo = {fWk, hWk, fRegs, hRegs, weeks};
+  } else {
+    perSession = Math.round(v.spots*v.full/100);   // whole players per session
+    players = perSession*v.sessions;
+    const bring = v.friend/100;              // share of paying players who bring one free friend
+    const share = bring/(1+bring);           // share of all players who came free
+    paid = Math.round(players*(1-share)); free = players-paid;   // whole players
+    regRev = paid*v.price;
+  }
+  const adsYear = camp ? v.ads : v.ads*v.sessions;
+  const feeYear = v.fee*MONTHS;
+  const period = state.period, setup = period===1 ? v.setup : 0;
+  const cost = setup + feeYear + adsYear;
+  const avgIn = regRev/MONTHS, avgCost = (feeYear+adsYear)/MONTHS;
+  // when players arrive and when the ones who stay start spending
+  const arrivals = Array(MONTHS).fill(0), joins = Array(MONTHS).fill(0), counts = Array(MONTHS).fill(0);
+  const marks = [];
+  // joins = when stayers start spending (month after); counts = when they show as still playing
+  if(camp){ const k = players*v.keep/100; arrivals[6] += players; joins[8] += k; counts[8] += k; marks.push({i:6, label:'Camp season', add:players, unitLabel:'campers'}); }   // camp in July, year-round programs from September
+  else for(let i=0;i<v.sessions;i++){ const m = Math.floor(MONTHS*i/v.sessions), k = perSession*v.keep/100;
+    arrivals[m] += perSession; if(m+1<MONTHS) joins[m+1] += k; counts[Math.min(m+1, MONTHS-1)] += k;
+    marks.push({i:m, label:`Session ${i+1}`, short:`S${i+1}`, add:perSession}); }
+  // next 12 months: players who stayed in the first 12 months carry over, less drop-off
+  const y1Stayers = counts.reduce((a,b)=>a+b,0);
+  const carry = period===2 ? y1Stayers*v.renew/100 : 0;
+  let cumP = 0, cumS = carry, cumC = carry;
+  const spendMo = v.spendMode==='month' ? v.spend : v.spend/12;
+  const mo = arrivals.map((a,i)=>{ cumP += a; cumS += joins[i]; cumC += counts[i]; return {players:cumP, stayers:cumC, stay:cumS*spendMo, inn:avgIn+cumS*spendMo, cost:avgCost+(i===0?setup:0)}; });
+  const stayYear = mo.reduce((s,x)=>s+x.stay,0);
+  return {key, v, camp, campInfo, marks, period, setup, carry, y1Stayers, perSession, players, paid, free, regRev, adsYear, feeYear, cost, avgIn, avgCost, mo, stayYear,
+    totalIn: regRev+stayYear, stayersEnd: mo[MONTHS-1].stayers, stayEnd: mo[MONTHS-1].stay};
+}
+function combine(a, b){
+  const mo = a.mo.map((x,i)=>{ const y=b.mo[i]; return {players:x.players+y.players, stayers:x.stayers+y.stayers, stay:x.stay+y.stay, inn:x.inn+y.inn, cost:x.cost+y.cost}; });
+  const sum = k => a[k]+b[k];
+  return {both:true, players:sum('players'), paid:sum('paid'), free:sum('free'), regRev:sum('regRev'), adsYear:sum('adsYear'), feeYear:sum('feeYear'),
+    cost:sum('cost'), avgCost:sum('avgCost'), stayYear:sum('stayYear'), totalIn:sum('totalIn'), stayersEnd:sum('stayersEnd'), stayEnd:sum('stayEnd'),
+    setup: a.setup+b.setup, carry: a.carry+b.carry, y1Stayers: a.y1Stayers+b.y1Stayers, period: a.period, fee: a.v.fee+b.v.fee, mo, marks: a.marks.concat(b.marks), a, b};
+}
+
+/* ---------- inputs ---------- */
+function ctlHTML(f, v){
+  const val = v[f.key];
+  return `<div class="ctl${f.row?' row':''}${f.wide?' wide':''}">
+    <label for="n-${f.key}">${f.label}</label>
+    <div class="num">${f.pre?`<span class="aff">${f.pre}</span>`:''}<input type="number" id="n-${f.key}" data-key="${f.key}" min="${f.min}" step="${f.step}" value="${val}">${f.suf?`<span class="aff">${f.suf}</span>`:''}</div>
+    <input type="range" id="r-${f.key}" data-key="${f.key}" min="${f.min}" max="${Math.max(f.max,val)}" step="${f.step}" value="${val}" aria-label="${f.label}">
+    ${f.hint?`<span class="hint">${f.hint}</span>`:''}
+  </div>`;
+}
+function spendCtlHTML(f, v){
+  const yr = v.spendMode!=='month', max = Math.max(yr?12000:1000, v.spend), step = yr?50:5;
+  return `<div class="ctl wide">
+    <div class="ctl-head"><label for="n-spend">${state.tab==='camp'?'Year-round spend per kid':'What each player spends'}</label>
+      <div class="seg mini" role="group" aria-label="Spend entered as">${[['year','Per year'],['month','Per month']].map(([k,l])=>`<button type="button" data-spendmode="${k}" aria-pressed="${(yr?'year':'month')===k}">${l}</button>`).join('')}</div></div>
+    <div class="num"><span class="aff">$</span><input type="number" id="n-spend" data-key="spend" min="0" step="${step}" value="${v.spend}"></div>
+    <input type="range" id="r-spend" data-key="spend" min="0" max="${max}" step="${step}" value="${v.spend}" aria-label="What each one spends">
+    <p class="hint-sm" id="spend-note"></p>
+  </div>`;
+}
+function renderInputs(){
+  const el = document.getElementById('inputs');
+  if(state.tab==='both'){
+    const blk = key => { const r = calc(key), v = r.v;
+      return `<div class="ro"><h3>${PROGRAMS[key].name}<button class="ro-btn" type="button" data-goto="${key}">Edit</button></h3><dl>
+        <dt>${key==='ltn'?'New adults in 12 months':'Juniors who attend camp'}</dt><dd>${int(r.players)}</dd>
+        <dt>${key==='ltn'?'Price':r.existing?'More campers than last summer':'Full-Day / Half-Day per week'}</dt><dd>${key==='ltn'?$(v.price):r.existing?int(r.added):`${$(v.fprice)} / ${$(v.hprice)}`}</dd>
+        <dt>Total investment</dt><dd>${$(r.cost)}</dd>
+        <dt>${key==='ltn'?'Keep playing after the program':'Join year-round after camp'}</dt><dd>${v.keep}%</dd></dl></div>`; };
+    el.innerHTML = `<div class="ro-wrap">${blk('ltn')}${blk('camp')}</div><p class="fine" style="padding-top:12px">This view adds both programs together. Change the numbers on each program's tab.</p>`;
+    el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.goto)));
+    return;
+  }
+  const p = PROGRAMS[state.tab], v = state[state.tab];
+  // for a camp they already run, year-round kids are counted only from the campers SignUpEngine added
+  const relabel = f => (state.tab==='camp' && v.mode==='existing' && f.key==='keep')
+    ? {...f, label:'New campers who join a year-round program', hint:'Counted only from the campers you added over last summer'} : f;
+  const fs = g => p.fields.filter(f=>f.g===g).map(relabel).map(f=> f.key==='spend' ? spendCtlHTML(f,v) : ctlHTML(f,v)).join('');
+  const cell = (k, pre, suf, dis) => `<div class="num tnum${dis?' dis':''}">${pre?`<span class="aff">${pre}</span>`:''}<input type="number" id="n-${k}" data-key="${k}" min="0" value="${v[k]}" style="width:${String(v[k]).length+0.4}ch" ${dis?'disabled':''} aria-label="${k}">${suf?`<span class="aff">${suf}</span>`:''}</div>`;
+  const campTable = state.tab!=='camp' ? '' : `
+    <div class="ctable" role="table" aria-label="Full-Day and Half-Day">
+      <div class="trow th" role="row"><span>Per week</span><span>Spots</span><span>How full</span><span>Avg price</span></div>
+      <div class="trow" role="row"><span class="tl">Full-Day</span>${cell('fspots')}${cell('ffull','','%')}${cell('fprice','$')}</div>
+      <div class="trow" role="row"><span class="tl">Half-Day</span>${cell('hspots')}${cell('hfull','','%')}${cell('hprice','$')}</div>
+    </div>`;
+  el.innerHTML = `
+    <div class="grp"><h2>Your ${state.tab==='camp'?'camp':'program'}</h2>${state.tab==='camp'?`<div class="seg mode" role="group" aria-label="Camp type">
+        <button type="button" data-cmode="new" aria-pressed="${v.mode!=='existing'}">New camp</button><button type="button" data-cmode="existing" aria-pressed="${v.mode==='existing'}">Camp you already run</button></div>`:''}
+      ${state.tab==='camp'&&v.mode==='existing' ? `<div class="ctls">${fs('x')}</div><div class="note" id="prog-note"></div>`
+        : `<div class="ctls">${fs('p')}</div>${campTable}<div class="note" id="prog-note"></div>`}${state.tab==='camp'?`<div class="ctls">${fs('e')}</div>`:''}</div>
+    <div class="grp"><h2>Your investment</h2><div class="ctls">${fs('c')}</div></div>
+    <div class="grp"><h2>${state.tab==='ltn'?'Players who stay':'After camp'}</h2><div class="ctls">${fs('s')}</div></div>
+    ${state.tab==='camp'?`<div class="grp" style="border-bottom:0"><h2>Next season</h2><div class="ctls">${fs('n')}</div></div>`:''}
+    <button type="button" class="reset" id="reset">Reset example numbers</button>`;
+  el.querySelectorAll('[data-cmode]').forEach(b=>b.addEventListener('click',()=>{ v.mode = b.dataset.cmode; renderInputs(); renderResults(); }));
+  el.querySelectorAll('input[type=range]').forEach(r=>r.addEventListener('input',()=>update(r.dataset.key, +r.value, 'range')));
+  el.querySelectorAll('input[type=number]').forEach(n=>{
+    n.addEventListener('input',()=>{ if(n.closest('.tnum')) n.style.width = (Math.max(1,n.value.length)+0.4)+'ch'; if(n.value!=='') update(n.dataset.key, +n.value, 'num'); });
+    n.addEventListener('change',()=>{ n.value = state[state.tab][n.dataset.key]; });
+  });
+  el.querySelectorAll('[data-spendmode]').forEach(b=>b.addEventListener('click',()=>{
+    const m = b.dataset.spendmode; if((v.spendMode||'year')===m) return;
+    v.spend = m==='month' ? Math.round(v.spend/12) : Math.round(v.spend*12);
+    v.spendMode = m; renderInputs(); renderResults();
+  }));
+  document.getElementById('reset').addEventListener('click',()=>{ state[state.tab] = {...DEFAULTS[state.tab]}; renderInputs(); renderResults(); });
+}
+function update(key, val, from){
+  const v = state[state.tab];
+  if(isNaN(val)) return;
+  const f = PROGRAMS[state.tab].fields.find(x=>x.key===key);
+  val = Math.max(f.min, val);
+  if(['full','friend','keep','renew','back','grow','early','sessions','ffull','hfull','wpc','growNow'].includes(key)) val = Math.min(f.max, val);
+  if(key==='wpc') val = Math.max(1, val);
+  if(key==='sessions') val = Math.max(1, Math.round(val));
+  v[key] = val;
+  const r = document.getElementById('r-'+key), n = document.getElementById('n-'+key);
+  if(r && from!=='range'){ if(+r.max < val) r.max = val; r.value = val; }
+  if(from!=='num' || +n.value!==val) n.value = val;
+  renderResults();
+}
+
+/* ---------- results ---------- */
+function niceMax(v){ if(v<=0) return 10; const p = Math.pow(10, Math.floor(Math.log10(v))); for(const m of [1,1.5,2,2.5,3,4,5,6,8,10]) if(m*p>=v) return m*p; return 10*p; }
+function niceScale(max, integer){
+  if(max<=0) return {top:4, step:1};
+  const rough = max/4, p = Math.pow(10, Math.floor(Math.log10(rough))), n = rough/p;
+  let step = (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p;
+  if(integer) step = Math.max(1, Math.ceil(step));
+  return {top: Math.ceil(max/step)*step, step};
+}
+function lineChart(series, fmt, labels, yTitle, marks, integer, bands){
+  const hasBands = bands && bands.length, hasMarks = marks && marks.length;
+  // layout from the top: phase bands, then the axis title, then the plot
+  const top = hasBands ? 42 : (hasMarks ? 40 : 0);
+  const W=760, L=58, R=110, B=46, T = top + 34, H = T + 238 + B;
+  const vals = series.flatMap(s=>s.data.filter(v=>v!==null));
+  const sc = niceScale(Math.max(...vals, 1), integer), maxV = sc.top;
+  const X = i => L + (W-L-R)*i/(MONTHS-1), Y = v => T + (H-T-B)*(1-v/maxV);
+  let g = '';
+  for(let val=0; val<=maxV+1e-9; val+=sc.step){ const y=Y(val);
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="var(--muted)">${fmt.axis(val)}</text>`; }
+  if(hasBands){
+    bands.forEach((bd,j)=>{ const x1 = Math.max(L, X(bd.a)), x2 = Math.min(W-R, X(bd.b));
+      if(x2-x1<2) return;
+      const shades = ['#9B72BE','#8456AB','#6C3D91','#542C74'];
+      g += `<rect x="${x1}" y="4" width="${x2-x1-(j<bands.length-1?2:0)}" height="28" fill="${shades[Math.min(j,shades.length-1)]}"/>`;
+      g += `<text x="${(x1+x2)/2}" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">${x2-x1<70&&bd.short?bd.short:bd.label}</text>`;
+      if(j>0) g += `<line x1="${x1-1.5}" x2="${x1-1.5}" y1="34" y2="${H-B}" stroke="var(--soft)" stroke-dasharray="3 4"/>`;
+    });
+  }
+  if(hasMarks){
+    const short = marks.length>6;
+    marks.forEach(m=>{ const x = X(m.i);
+      g += `<line x1="${x}" x2="${x}" y1="${top-2}" y2="${H-B}" stroke="var(--soft)" stroke-dasharray="3 4"/>`;
+      g += `<text x="${x}" y="${top-22}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--purple)">${short&&m.short?m.short:m.label}</text>`;
+      g += `<text x="${x}" y="${top-8}" text-anchor="middle" font-size="11" fill="var(--muted)">+${int(m.add)}</text>`; });
+  }
+  for(let i=0;i<MONTHS;i++) g += `<text x="${X(i)}" y="${H-26}" text-anchor="middle" font-size="12" fill="var(--muted)">${labels[i]}</text>`;
+  g += `<text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">Month</text>`;
+  g += `<text x="4" y="${T-14}" text-anchor="start" font-size="13" font-weight="700" fill="var(--muted)">${yTitle}</text>`;
+  const ends = [];
+  series.forEach(s=>{
+    const idx = s.data.map((v,i)=>v===null?-1:i).filter(i=>i>=0), last = idx[idx.length-1];
+    const pts = idx.map(i=>`${X(i).toFixed(1)},${Y(s.data[i]).toFixed(1)}`).join(' ');
+    if(s.area) g += `<polygon points="${X(idx[0])},${Y(0)} ${pts} ${X(last)},${Y(0)}" fill="var(--tint)" opacity=".85"/>`;
+    g += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="${s.dash?2.5:3}" stroke-linejoin="round" stroke-linecap="round"${s.dash?' stroke-dasharray="6 5"':''}/>`;
+    idx.forEach(i=>{ g += `<circle cx="${X(i)}" cy="${Y(s.data[i])}" r="${i===last?5:2.5}" fill="${s.color}"><title>${labels[i]}: ${fmt.val(s.data[i])}</title></circle>`; });
+    ends.push({x:X(last)+10, y:Y(s.data[last]), text:fmt.val(s.data[last])+(s.endLabel?` ${s.endLabel}`:''), color:s.color, mid:last<MONTHS-1});
+  });
+  // keep end labels apart, stacking upward from the bottom so none sit on the month labels
+  ends.forEach(e=>{ e.y = Math.min(e.y, Y(0)-6); });
+  ends.sort((a,b)=>b.y-a.y);
+  for(let i=1;i<ends.length;i++) for(let j=0;j<i;j++)   // check every label already placed, not just the previous one
+    if(Math.abs(ends[i].x-ends[j].x)<60 && ends[j].y-ends[i].y<22){ ends[i].y = ends[j].y-22; j = -1; }
+  ends.forEach(e=>{ g += `<text x="${e.x}" y="${e.mid?e.y-6:e.y+5}" text-anchor="start" font-size="14" font-weight="800" fill="${e.color}">${e.text}</text>`; });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Twelve months, month by month">${g}</svg>`;
+}
+
+function renderResults(){
+  const both = state.tab==='both';
+  const r = both ? combine(calc('ltn'), calc('camp')) : calc(state.tab);
+  const ret = r.cost>0 ? r.totalIn/r.cost : null, profit = r.totalIn - r.cost;
+  const who = both ? 'players and campers' : PROGRAMS[state.tab].who;
+
+  if(!both){
+    const v = r.v, note = document.getElementById('prog-note');
+    const c = r.campInfo;
+    if(r.camp && r.existing){ note.className = 'camp-sum'; note.innerHTML = `<div><b>${$(r.per)}</b><span>Revenue per camper last summer</span></div><div><b>${int(r.thisPlayers)}</b><span>Campers this summer (${r.thisPlayers-r.lastCampers>=0?'+':''}${int(r.thisPlayers-r.lastCampers)})</span></div>`; }
+    else if(r.camp){ note.className = 'camp-sum'; note.innerHTML = `<div><b>${int(c.weeks)}</b><span>Camper-weeks sold</span></div><div><b>${int(r.thisPlayers)}</b><span>Campers (at ${v.wpc} ${v.wpc===1?'week':'weeks'} each)</span></div>`; }
+    else note.innerHTML = `${v.sessions} sessions × ${int(r.perSession)} players (${v.full}% of ${v.spots}) = <b>${int(r.players)} new players in 12 months</b>`;
+    const sn = document.getElementById('spend-note');
+    if(sn){ const yr = v.spendMode!=='month', mo$ = yr ? v.spend/12 : v.spend;
+      sn.textContent = yr ? `= ${$(mo$)} a month` : `= ${$(v.spend*12)} a year`; }
+  }
+
+  const p2 = state.period===2, span = p2 ? 'in the next 12 months' : 'in the first 12 months', endM = p2 ? 'month 24' : 'month 12';
+  const spendMo = both ? null : (r.v.spendMode==='month' ? r.v.spend : r.v.spend/12);
+  let regNote;
+  if(both) regNote = `<b>${int(r.players)}</b> new players and campers across both programs`;
+  else if(r.camp) regNote = `<b>${int(r.season.fRegs)}</b> Full-Day weeks at ${$(r.v.fprice)}${r.season.hRegs>0?` + <b>${int(r.season.hRegs)}</b> Half-Day weeks at ${$(r.v.hprice)}`:''}`;
+  else regNote = r.free>0.5 ? `<b>${int(r.players)} new players</b>: <b>${int(r.paid)}</b> paid ${$(r.v.price)} and brought <b>${int(r.free)}</b> friends for free` : `<b>${int(r.players)} new players</b> at ${$(r.v.price)}`;
+  const stayWho = both ? 'players and families' : who;
+  const spendTxt = both ? null : (r.v.spendMode==='month' ? `${$(r.v.spend)} a month` : `${$(r.v.spend)} a year`);
+  const keepTxt = both ? '' : (r.camp ? ` (${r.v.keep}% of ${int(r.players)} campers)` : ` (${r.v.keep}% of new ${who})`);
+  const stayNote = p2
+    ? `<b>${int(r.carry)}</b> still playing from your first 12 months${both?'':` (${r.v.renew}% of ${int(r.y1Stayers)})`} + <b>${int(r.stayersEnd-r.carry)}</b> new${keepTxt}${spendTxt?`, at <b>${spendTxt}</b> each`:''}`
+    : `<b>${int(r.stayersEnd)} ${stayWho}</b>${keepTxt}${spendTxt?` at <b>${spendTxt}</b> each`:''}, counted from when they join`;
+  let costLabel = 'Total investment';
+  let costNote = both ? '' : p2 ? `No setup fee. ${$(r.v.fee)} a month for the platform and ${$(r.adsYear)} in digital ads` : `${$(r.setup)} setup, ${$(r.v.fee)} a month for the platform, and ${$(r.adsYear)} in digital ads`;
+  let regLabel = 'Registrations', stayLabel = `${both?'People':'Players'} who keep playing`, stayNoteOut = stayNote;
+  let ledHead = `Your ${p2?'next':'first'} 12 months`;
+  if(r.camp && !both){
+    const sp = spendTxt ? `, at <b>${spendTxt}</b> each` : '';
+    ledHead = p2 ? 'Next camp season' : 'This camp season';
+    regLabel = p2 ? 'Next summer\u2019s camp' : 'Camp registrations';
+    if(p2) regNote += `<br>Up <b>${r.v.grow}%</b>: <b>${int(r.players)}</b> campers, <b>${int(r.returning)}</b> coming back + <b>${int(r.newCampers)}</b> new`;
+    stayLabel = 'Kids in year-round programs';
+    stayNoteOut = p2
+      ? `<b>${int(r.carry)}</b> kids still enrolled from this season (${r.v.renew}% of ${int(r.y1Stayers)}) all year + <b>${int(r.joinNew)}</b> new from September (${r.v.keep}% of ${int(r.newCampers)} new campers)${sp}`
+      : `<b>${int(r.joinNew)}</b> kids (${r.v.keep}% of ${int(r.thisPlayers)} campers) from September${sp}`;
+    costNote = p2
+      ? `No setup fee. Digital ads only need to find the ${int(r.newCampers)} new campers (${$(r.adsSeason)})`
+      : `${$(r.setup)} setup, ${$(r.v.fee)} a month for the platform, and ${$(r.adsSeason)} in digital ads`;
+    if(r.existing){
+      regLabel = 'Growth over last summer';
+      regNote = `<b>${int(r.added)}</b> more campers than last summer, at about <b>${$(r.per)}</b> each. Camp revenue goes from ${$(r.lastRev)} to <b>${$(r.totalRev)}</b>`;
+      stayNoteOut = p2
+        ? `<b>${int(r.carry)}</b> kids still enrolled from this season all year + <b>${int(r.joinNew)}</b> new from September${sp}`
+        : `<b>${int(r.joinNew)}</b> of your ${int(r.added)} new campers (${r.v.keep}%) join from September${sp}`;
+    }
+  }
+  const row = (label, note, val, cls='') => `<div class="row ${cls}"><div class="lab">${label}${note?`<small>${note}</small>`:''}</div><div class="val">${val}</div></div>`;
+
+  document.getElementById('bottom').innerHTML = `
+    <div><div class="k-label">Your return</div>
+      <div class="x">${ret===null?'n/a':ret.toFixed(2)+'x'}</div>
+      <div class="k-sub">${ret===null?'':`$${ret.toFixed(2)} back for every $1 invested`}</div></div>
+    <div class="ledger">
+      <div class="led-h">${ledHead}</div>
+      ${both ? [
+        row('Adult beginner program', `<b>${int(r.a.players)}</b> adults register`, $(r.a.regRev)),
+        row(r.b.existing?'Summer camp growth':'Summer camps', r.b.existing?`<b>${int(r.b.added)}</b> more campers than last summer`:`<b>${int(r.b.players)}</b> juniors attend camp`, $(r.b.regRev)),
+        row('Adults who keep playing', `<b>${int(r.a.stayersEnd)}</b> adults by the end of the 12 months`, $(r.a.stayYear)),
+        row('Juniors in year-round programs', `<b>${int(r.b.stayersEnd)}</b> kids by December`, $(r.b.stayYear))
+      ].join('') : row(regLabel, regNote, $(r.regRev)) + row(stayLabel, stayNoteOut, $(r.stayYear))}
+      ${row(costLabel, both ? (p2 ? 'No setup fees. The platform and digital ads for both programs' : r.setup>0 ? `${$(r.setup)} setup, plus the platform and digital ads for both programs` : 'The platform and digital ads for both programs') : costNote, $(-r.cost), 'out')}
+      ${row(profit>=0?'You come out ahead':'You come out behind', '', $(Math.abs(profit)), 'total')}
+    </div>`;
+
+  const labels = (!both && r.camp) ? MON : Array.from({length:MONTHS},(_,i)=>String(i+1+(p2?12:0)));
+  const mo = r.mo;
+  if(both){
+    const A = r.a, Bc = r.b;
+    // returns for both periods, so year-two growth is visible from either tab
+    const saved = state.period, rets = {};
+    [1,2].forEach(pp=>{ state.period = pp; const a=calc('ltn'), b=calc('camp');
+      const q = (i,c) => c>0 ? i/c : null;
+      rets[pp] = {a:q(a.totalIn,a.cost), b:q(b.totalIn,b.cost), t:q(a.totalIn+b.totalIn, a.cost+b.cost)}; });
+    state.period = saved;
+    const costL = 'Total investment';
+    const groups = state.view==='money' ? [
+      {name:'Adult beginner program', rk:'a', bars:[{label:'Revenue generated', v:A.totalIn, c:'var(--purple)'}, {label:costL, v:A.cost, c:'var(--blue)'}]},
+      {name:'Summer camps (juniors)', rk:'b', bars:[{label:'Revenue generated', v:Bc.totalIn, c:'var(--purple)'}, {label:costL, v:Bc.cost, c:'var(--blue)'}]},
+      {name:'Both programs', total:true, rk:'t', bars:[{label:'Revenue generated', v:r.totalIn, c:'var(--purple)'}, {label:costL, v:r.cost, c:'var(--blue)'}]}
+    ] : [
+      {name:'Adult beginner program', bars:[{label:'Registered', v:A.players, c:'var(--soft)'}, {label:'Keep playing', v:A.stayersEnd, c:'var(--purple)'}]},
+      {name:'Summer camps (juniors)', bars:[{label:'Registered', v:Bc.players, c:'var(--soft)'}, {label:'In year-round programs', v:Bc.stayersEnd, c:'var(--purple)'}]}
+    ];
+    const fmt = state.view==='money' ? $ : int;
+    const max = Math.max(1, ...groups.flatMap(g=>g.bars.map(b=>b.v)));
+    document.getElementById('aha').textContent = state.view==='money' ? 'Adults and juniors each pay for themselves.' : 'Adults and juniors, side by side.';
+    document.getElementById('cap').textContent = state.view==='money'
+      ? `Registrations plus players who keep playing, against what each program costs ${span}.`
+      : `How many adults and juniors register ${span}, and how many keep playing.`;
+    document.getElementById('legend').innerHTML = state.view==='money'
+      ? `<span><i style="background:var(--purple)"></i>Revenue generated</span><span><i style="background:var(--blue)"></i>${costL}</span>`
+      : `<span><i style="background:var(--soft)"></i>Registered</span><span><i style="background:var(--purple)"></i>Keep playing</span>`;
+    document.getElementById('chart').innerHTML = `<div class="cmp">${groups.map(g=>`
+      <div class="cmp-g${g.total?' total':''}"><div class="cmp-n"><span>${g.name}</span>${g.rk?`<span class="cmp-x">${rets[saved][g.rk]===null?'No costs entered':`${rets[saved][g.rk].toFixed(2)}x return${saved===2&&rets[1][g.rk]!==null?`<small>up from ${rets[1][g.rk].toFixed(2)}x</small>`:''}`}</span>`:''}</div>
+        ${g.bars.map(b=>`<div class="cmp-r"><span class="cmp-l">${b.label}</span><div class="cmp-t"><div class="cmp-b" style="width:${Math.max(0.6, b.v/max*100)}%;background:${b.c}"></div><span class="cmp-v">${fmt(b.v)}</span></div></div>`).join('')}
+      </div>`).join('')}</div>`;
+  } else if(state.view==='money'){
+    const fee = both ? r.fee : r.v.fee;
+    const setup = r.setup;
+    if(r.camp && !both){
+      const yrMo = mo[MONTHS-1].stay;
+      const moCost = mo[MONTHS-1].cost;
+      document.getElementById('aha').textContent = r.existing ? 'Every month runs ahead of last summer.' : 'Camp pays first. Year-round programs keep paying.';
+      document.getElementById('cap').textContent = r.existing ? `The gap between the two camp lines is your growth: ${$(r.regRev)} more than last summer${p2?', before SignUpEngine':''}.${yrMo>0.5?` After camp, kids from your new campers bring in ${$(yrMo)} a month in year-round programs.`:''}` : `Camp registrations stop when camp ends.${yrMo>0.5?` After that, kids in year-round programs bring in ${$(yrMo)} a month${yrMo>moCost?`, well above the ${$(moCost)} you invest`:''}.`:''}`;
+    } else {
+      document.getElementById('aha').textContent = 'Your investment stays flat. Revenue keeps growing.';
+      document.getElementById('cap').textContent = `You invest about ${$(r.avgCost)} a month in the platform and digital ads.`;
+    }
+    const campView = r.camp && !both;
+    document.getElementById('legend').innerHTML = campView
+      ? `<span><i style="background:var(--purple)"></i>${r.existing?'This summer\u2019s camp registrations':'Camp registrations'}</span>${r.existing?`<span><i style="background:repeating-linear-gradient(90deg,var(--muted) 0 6px,transparent 6px 10px)"></i>Last summer</span>`:''}<span><i style="background:var(--yr)"></i>Year-round programs</span><span><i style="background:var(--blue)"></i>Your investment</span>`
+      : `<span><i style="background:var(--purple)"></i>What comes in each month</span><span><i style="background:var(--blue)"></i>Your investment each month</span>`;
+    const series = campView ? [
+      {data: mo.map((x,i)=>i<REG_MONTHS ? (r.existing ? x.campTotal : x.campRev) : null), color:'var(--purple)', area:true},
+      ...(r.existing ? [{data: mo.map((x,i)=>i<REG_MONTHS ? x.campLast : null), color:'var(--muted)', dash:true}] : []),
+      {data: mo.map(x=>x.stay>0.5 ? x.stay : null), color:'var(--yr)'},
+      {data: mo.map(x=>x.cost), color:'var(--blue)'}
+    ] : [
+      {data: mo.map(x=>x.inn), color:'var(--purple)', area:true},
+      {data: mo.map(x=>x.cost), color:'var(--blue)'}
+    ];
+    document.getElementById('chart').innerHTML = lineChart(series, {axis:kfmt, val:$}, labels, 'Dollars per month', null, false, r.bands);
+  } else if(!both){
+    document.getElementById('aha').textContent = r.camp&&!both ? 'Campers register. Many move into year-round programs.' : 'New players keep adding up.';
+    if(r.camp && !both) document.getElementById('cap').textContent = `${int(r.players)} campers register from January through August${r.existing?`, ${int(r.added)} more than last summer`:''}${p2?` (${int(r.returning)} coming back)`:''}, and ${int(r.stayersEnd)} kids are in year-round programs by December.`;
+    else document.getElementById('cap').textContent = `${int(r.players)} new ${both?'players and campers':who} come through your club ${span}, and ${int(r.stayersEnd)} are playing by ${endM}${p2?`, including ${int(r.carry)} from your first 12 months`:''}.`;
+    document.getElementById('legend').innerHTML = r.camp&&!both
+      ? `<span><i style="background:var(--soft)"></i>Campers registered, running total</span><span><i style="background:var(--purple)"></i>Kids in year-round programs</span>`
+      : `<span><i style="background:var(--soft)"></i>New ${both?'players':who} brought in, running total</span><span><i style="background:var(--purple)"></i>Still playing at your club</span>`;
+    document.getElementById('chart').innerHTML = lineChart([
+      {data: r.camp&&!both ? mo.map((x,i)=>i<REG_MONTHS?x.players:null) : mo.map(x=>x.players), color:'var(--soft)', endLabel: r.camp&&!both?'registered':''},
+      {data: mo.map(x=>x.stayers), color:'var(--purple)', area:true}
+    ], {axis:v=>int(v), val:int}, labels, r.camp?'Campers and program kids':'Players', r.bands?null:r.marks, true, r.bands);
+  }
+  const unit = both ? 'program' : PROGRAMS[state.tab].session.replace('camp week','camp');
+  const whoCap = both ? 'People' : who[0].toUpperCase()+who.slice(1);
+  if(both){
+    document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
+    <li>This adds both programs together, using the numbers on each program's tab.</li>
+    <li>Each program has its own ${p2?'':'setup, '}ads and monthly fee.</li>
+    <li>Revenue generated includes registrations plus what adults and juniors who keep playing spend.</li>
+    <li>The adult program counts 12 months from its first session. Camps follow the calendar year, from January registration through December.</li></ul>`;
+    return;
+  }
+  if(r.camp && !both){
+    document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
+    <li>${r.v.early}% of campers sign up in January with the early bird. The rest register through August, tapering off as camp fills. Digital ads follow the same pattern.</li>
+    <li>Kids who move into year-round programs start spending in September.${p2?' Kids still enrolled from this season spend all year.':''}</li>
+    <li>${p2?`Next season grows ${r.v.grow}%. Returning campers fill part of it, so ads only need to find new campers. There is no setup fee.`:'Setup is counted once, in January.'}</li>
+    ${r.existing?`<li>Because you already run this camp, only growth over last summer counts toward your return: ${int(r.added)} more campers at about ${$(r.per)} each. Year-round programs count only kids from those new campers.</li>`:''}</ul>`;
+    return;
+  }
+  document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
+    <li>${p2
+      ? `The next 12 months has no setup fee, the same sessions run again, and ${both?'each program\u2019s \u201cStill playing the next year\u201d share':`${state[state.tab].renew}%`} of ${both?'its':'the'} players who stayed are still playing.`
+      : 'All numbers are for your first 12 months, using the example numbers until you enter your own.'}</li>
+    <li>Registrations, ads and the monthly fee are averaged across the 12 months.${p2?'':' Setup is counted once, in month 1.'}</li>
+    <li>${whoCap} who stay start spending the month after their ${unit}.</li></ul>`;
+}
+
+function setTab(t){
+  state.tab = t;
+  document.querySelectorAll('[data-period]').forEach(b=>{ b.textContent = b.dataset.period==='1'
+    ? (t==='camp' ? 'This camp season' : 'First 12 months')
+    : (t==='camp' ? 'Next camp season' : 'Next 12 months'); });
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===t ? 'true':'false'));
+  renderInputs(); renderResults();
+}
+function setPeriod(pp){
+  state.period = pp;
+  document.querySelectorAll('[data-period]').forEach(x=>x.setAttribute('aria-pressed', String(+x.dataset.period===pp)));
+  if(state.tab==='both') renderInputs();
+  renderResults();
+}
+document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>setPeriod(+b.dataset.period)));
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
+  state.view = b.dataset.view;
+  document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed', x===b));
+  renderResults();
+}));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+
+/* ---------- emailed report ---------- */
+const rep = {type:'ltn', form:{}};
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const xr = (i,c) => c>0 ? (i/c).toFixed(2)+'x' : 'n/a';
+function bothPeriods(){
+  const saved = state.period, out = {};
+  [1,2].forEach(pp=>{ state.period = pp; out[pp] = {a:calc('ltn'), b:calc('camp')}; });
+  state.period = saved; return out;
+}
+const SUE_LOGO = 'data:image/png;base64,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';
+// true when a program's inputs are still the example defaults
+const isExample = key => Object.keys(DEFAULTS[key]).every(k => k==='mode' || state[key][k]===DEFAULTS[key][k]);
+function basisHTML(key){
+  const v = state[key], sp = `${$(v.spend)} a ${v.spendMode!=='month'?'year':'month'}`;
+  const items = key==='ltn' ? [
+    `${v.sessions} sessions a year, ${v.spots} spots each, ${v.full}% full`,
+    `${$(v.price)} per player, and ${v.friend}% of paying players bring a free friend`,
+    `${v.keep}% keep playing, spending ${sp}, and ${v.renew}% of them are still playing a year later`,
+    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads per session`
+  ] : v.mode==='existing' ? [
+    `${v.lastCampers} campers last summer and ${$(v.lastRev)} in camp revenue, about ${$(v.lastRev/Math.max(1,v.lastCampers))} per camper`,
+    `${v.growNow}% more campers this summer with SignUpEngine, and ${v.early}% sign up in January`,
+    `Only growth over last summer counts toward the return`,
+    `${v.keep}% of new campers join a year-round program, spending ${sp}, and ${v.renew}% stay enrolled the next year`,
+    `Next season grows ${v.grow}%, and ${v.back}% of campers come back`,
+    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads for the season`
+  ] : [
+    `${v.sessions} camp weeks. Full-Day: ${v.fspots} spots at ${$(v.fprice)}, ${v.ffull}% full. Half-Day: ${v.hspots} spots at ${$(v.hprice)}, ${v.hfull}% full`,
+    `Campers stay ${v.wpc} weeks on average, and ${v.early}% sign up in January`,
+    `${v.keep}% join a year-round program, spending ${sp}, and ${v.renew}% stay enrolled the next year`,
+    `Next season grows ${v.grow}%, and ${v.back}% of campers come back`,
+    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads for the season`
+  ];
+  return `<ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul>`;
+}
+function reportHTML(type){
+  const P = bothPeriods(), f = rep.form;
+  const club = f.club || 'Your club', name = f.name || 'Your name', role = f.role ? `, ${f.role}` : '';
+  const today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  const A1=P[1].a, A2=P[2].a, B1=P[1].b, B2=P[2].b;
+  const pick = pp => type==='ltn' ? P[pp].a : type==='camp' ? P[pp].b : combine(P[pp].a, P[pp].b);
+  const r1 = pick(1), r2 = pick(2);
+  const cols = type==='camp' ? ['This camp season','Next camp season'] : ['Your first 12 months','The next 12 months'];
+  const title = type==='ltn' ? 'Adult Beginner Program: what it pays back'
+    : type==='camp' ? 'Summer Camps: what they pay back' : 'Adult Beginner Program and Summer Camps: what they pay back';
+  const B = n => `<b>${n}</b>`;
+  const grows = (a,b) => b>=a*2 ? 'more than doubles' : 'grows';
+  let p1, p2;
+  if(type==='ltn'){
+    const carry = int(A2.carry), fresh = Math.round(A2.stayersEnd) - Math.round(A2.carry);
+    p1 = [ `${B(int(A1.players)+' new adults')} sign up, bringing in ${B($(A1.regRev))}`,
+      A1.stayersEnd>0.5 ? `${B(int(A1.stayersEnd)+' keep playing')}, worth ${B($(A1.stayYear))} this year` : null,
+      `${B('Total investment: '+$(A1.cost))} for setup, the platform and digital ads` ];
+    p2 = [ `${B('No setup fee')}, so your investment drops to ${B($(A2.cost))}`,
+      A2.stayersEnd>0.5 ? `${B(int(A2.stayersEnd)+' adults')} are playing by month 24: ${carry} from your first year plus ${fresh} new` : null,
+      `Revenue ${grows(A1.totalIn,A2.totalIn)} to ${B($(A2.totalIn))}, up from ${$(A1.totalIn)}` ];
+  } else if(type==='camp' && B1.existing){
+    p1 = [ `${B(int(B1.added)+' more campers')} than last summer, at about ${$(B1.per)} each, bringing in ${B($(B1.regRev))} more`,
+      `Camp revenue goes from ${$(B1.lastRev)} to ${B($(B1.totalRev))}`,
+      B1.stayersEnd>0.5 ? `${B(int(B1.stayersEnd)+' of the new campers')} join year-round programs, worth ${B($(B1.stayYear))} by December` : null,
+      `${B('Total investment: '+$(B1.cost))} for setup, the platform and digital ads` ];
+    p2 = [ `Camp grows another ${B(B1.v.grow+'%')} to ${B(int(B2.players)+' campers')}, ${int(B2.added)} more than before SignUpEngine`,
+      `${B('No setup fee')}, and digital ads only need to find new campers, so your investment drops to ${B($(B2.cost))}`,
+      B2.stayersEnd>0.5 ? `${B(int(B2.stayersEnd)+' kids')} from your new campers in year-round programs by December` : null ];
+  } else if(type==='camp'){
+    const per = B1.players>0 ? B1.regRev/B1.players : 0, cpc = B1.players>0 ? B1.cost/B1.players : 0;
+    p1 = [ `${B(int(B1.players)+' campers')} sign up, bringing in ${B($(B1.regRev))}`,
+      `Each camper brings in about ${B($(per))}, for about ${B($(cpc))} of your investment`,
+      B1.stayersEnd>0.5 ? `${B(int(B1.stayersEnd)+' kids')} join year-round programs, worth ${B($(B1.stayYear))} by December` : null,
+      `${B('Total investment: '+$(B1.cost))} for setup, the platform and digital ads` ];
+    p2 = [ `Camp grows ${B(B1.v.grow+'%')} to ${B(int(B2.players)+' campers')}, and ${int(B2.returning)} of them come back`,
+      `${B('No setup fee')}, and digital ads only need to find new campers, so your investment drops to ${B($(B2.cost))}`,
+      B2.stayersEnd>0.5 ? `${B(int(B2.stayersEnd)+' kids')} in year-round programs by December` : null ];
+  } else {
+    p1 = [ `${B('Adult Beginner Program: '+xr(A1.totalIn,A1.cost))}, with ${int(A1.players)} new adults and ${int(A1.stayersEnd)} who keep playing`,
+      B1.existing ? `${B('Summer Camps: '+xr(B1.totalIn,B1.cost))}, with ${int(B1.added)} more campers than last summer` : `${B('Summer Camps: '+xr(B1.totalIn,B1.cost))}, with ${int(B1.players)} campers and ${int(B1.stayersEnd)} who join year-round programs`,
+      `${B('Total investment: '+$(r1.cost))} for setup, the platform and digital ads across both` ];
+    p2 = [ `${B('Adult Beginner Program: '+xr(A2.totalIn,A2.cost))}, as adults who stayed keep paying`,
+      `${B('Summer Camps: '+xr(B2.totalIn,B2.cost))}, as camp grows ${B1.v.grow}% and ${int(B2.returning)} campers come back`,
+      `${B('No setup fees')}, so your investment drops to ${B($(r2.cost))}` ];
+  }
+  const pts = a => `<ul class="em-pts">${a.filter(Boolean).map(t=>`<li>${t}</li>`).join('')}</ul>`;
+  const hero = r => `<div class="em-hero"><div><div class="k">Your return</div><div class="big">${xr(r.totalIn,r.cost)}</div><div class="k">${r.cost>0?`$${(r.totalIn/r.cost).toFixed(2)} back for every $1 invested`:''}</div></div>
+    <div><div class="k">You come out ahead</div><div class="mid">${$(r.totalIn-r.cost)}</div><div class="k">more than you invest</div></div></div>`;
+  const progs = type==='both' ? [A1,B1] : [r1];
+  const sum = k => progs.reduce((t,x)=>t+x[k],0);
+  const fees = type==='both' ? `${$(A1.v.fee)} and ${$(B1.v.fee)} a month` : `${$(r1.v.fee)} a month`;
+  const covers = `<div class="em-sec"><div class="em-sec-h">What your investment covers</div><div class="em-inv">
+    <div><span>One-time setup</span><b>${$(sum('setup'))}</b></div>
+    <div><span>SignUpEngine platform<small>${fees}: ad management, campaign monitoring and optimization, eblasts, and registration support</small></span><b>${$(sum('feeYear'))}</b></div>
+    <div><span>Digital ads<small>Runs in your own ad account and is billed to your card by Meta or Google. None of it goes to SignUpEngine.</small></span><b>${$(sum('adsYear'))}</b></div>
+    <div class="tot"><span>Total investment, ${cols[0].replace('Your first','first').toLowerCase()}</span><b>${$(r1.cost)}</b></div></div></div>`;
+  const keys = type==='both' ? ['ltn','camp'] : [type], ex = keys.map(isExample);
+  const allEx = ex.every(Boolean), noneEx = !ex.some(Boolean);
+  const basisH = allEx ? 'Based on example numbers' : noneEx ? 'Based on your numbers' : 'Based on these numbers';
+  const tag = k => allEx || noneEx ? '' : `<span>${isExample(k)?'example numbers':'your numbers'}</span>`;
+  const exNote = allEx ? `<p class="em-ex">These are SignUpEngine's example numbers, not your club's. Put in your own in the calculator for a report that reflects your club.</p>`
+    : !noneEx ? `<p class="em-ex">One program still uses SignUpEngine's example numbers. Put in your own in the calculator for a report that reflects your club.</p>` : '';
+  const basis = type==='both'
+    ? `<h3>Adult Beginner Program${tag('ltn')}</h3>${basisHTML('ltn')}<h3>Summer Camps${tag('camp')}</h3>${basisHTML('camp')}` : basisHTML(type);
+  return `<div class="em">
+    <div class="em-top"><img src="${SUE_LOGO}" alt="SignUpEngine" width="76" height="30"><div class="em-date">${today}</div></div>
+    <div class="em-body">
+      <p class="em-club">${esc(club)}</p>
+      <h1>${title}</h1>
+      <p class="em-for">Prepared for ${esc(name)}${esc(role)}</p>
+      <div class="em-sec"><div class="em-sec-h">${cols[0]}</div>${hero(r1)}${pts(p1)}</div>
+      <div class="em-sec next"><div class="em-sec-h">${cols[1]}<span>up from ${xr(r1.totalIn,r1.cost)}</span></div>${hero(r2)}${pts(p2)}</div>
+      ${covers}
+      <div class="em-basis"><h2>${basisH}</h2>${exNote}${basis}</div>
+      <div class="em-cta"><p>Want to check these against your club's real numbers? We'll walk you through it in 15 minutes.</p>
+        <a class="b" href="https://signupengine.io" target="_blank" rel="noopener">Book a 15-minute walkthrough</a>
+        <a class="l" href="#" onclick="return false">Open the calculator with these numbers</a></div>
+    </div>
+    <div class="em-foot"><p>These are estimates based on the numbers entered on ${today}. Your results will depend on your club, your pricing and your market.</p>
+      <p>SignUpEngine · signupengine.io · Unsubscribe</p></div>
+  </div>`;
+}
+function renderPreview(){
+  document.querySelectorAll('[data-rt]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.rt===rep.type)));
+  const f = rep.form, cc = (f.cc||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,3);
+  document.getElementById('pv-note').innerHTML = f.sent
+    ? `Mockup only. In the live version this report is emailed to <b>${esc(f.email)}</b>${cc.length?` and <b>${cc.map(esc).join(', ')}</b>`:''}.`
+    : `Preview with your current numbers. Fill in the form to personalize it.`;
+  document.getElementById('pv-email').innerHTML = reportHTML(rep.type);
+}
+const ov = document.getElementById('report-ov'), form = document.getElementById('report-form'), pv = document.getElementById('pv');
+function exWarn(){ const t = form.querySelector('[name=rtype]:checked')?.value || state.tab;
+  const ex = (t==='both' ? ['ltn','camp'] : [t]).filter(isExample), w = document.getElementById('ex-warn');
+  w.hidden = !ex.length;
+  w.textContent = `You're still using our example numbers${t==='both'&&ex.length===1?` for ${ex[0]==='ltn'?'the adult beginner program':'summer camps'}`:''}, so the report will say so. Change them in the calculator first for a report about your club.`; }
+form.querySelectorAll('[name=rtype]').forEach(r=>r.addEventListener('change', exWarn));
+function openForm(){
+  form.querySelector(`[name=rtype][value=${state.tab}]`).checked = true; exWarn();
+  ov.hidden = false; setTimeout(()=>form.querySelector('[name=name]').focus(), 30);
+}
+function readForm(){ const d = Object.fromEntries(new FormData(form)); d.optin = !!d.optin; return d; }
+function openPreview(sent){
+  rep.form = {...readForm(), sent}; rep.type = rep.form.rtype || state.tab;
+  ov.hidden = true; pv.hidden = false; pv.scrollTop = 0; renderPreview();
+}
+document.getElementById('open-report').addEventListener('click', openForm);
+ov.addEventListener('click', e=>{ if(e.target===ov || e.target.closest('[data-close]')) ov.hidden = true; });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(!pv.hidden) pv.hidden = true; else ov.hidden = true; } });
+document.getElementById('just-preview').addEventListener('click', ()=>openPreview(false));
+form.addEventListener('submit', e=>{
+  e.preventDefault(); let ok = true;
+  form.querySelectorAll('[data-req]').forEach(l=>{ const i = l.querySelector('input'), v = i.value.trim();
+    const bad = !v || (l.hasAttribute('data-email') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    l.classList.toggle('err', bad); if(bad && ok){ i.focus(); ok = false; } });
+  if(ok) openPreview(true);
+});
+form.querySelectorAll('[data-req] input').forEach(i=>i.addEventListener('input',()=>i.closest('.fl').classList.remove('err')));
+document.querySelectorAll('[data-rt]').forEach(b=>b.addEventListener('click',()=>{ rep.type = b.dataset.rt; renderPreview(); }));
+document.getElementById('pv-close').addEventListener('click', ()=>{ pv.hidden = true; });
+setTab('ltn');
+</script>
+
+</body>
+</html>
