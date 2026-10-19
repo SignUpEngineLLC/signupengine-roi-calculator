@@ -19,6 +19,7 @@ lib/calc.js                   the numbers: programs, example inputs, the 12-mont
 lib/report.js                 the report: what it says, the in-page preview, the email version
 worker/                       Cloudflare Worker that emails the report through SendLayer
 assets/signupengine-logo.png  logo, used in the report (a real file so email clients will load it)
+assets/signupengine-mark.png  the round mark; favicon.ico, assets/favicon-*.png and apple-touch-icon.png are made from it
 robots.txt, noindex meta      keep it out of search engines; remove both if it should be indexed
 ```
 
