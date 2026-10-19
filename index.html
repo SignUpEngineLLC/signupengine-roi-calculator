@@ -415,14 +415,15 @@ const state = {tab:'ltn', view:'money', period:1, ltn:{...DEFAULTS.ltn}, camp:{.
 const calc = key => calcFor(state, key);
 let liveTimer;
 
-/* The URL hash holds every number that differs from the example (#ltn.spots=120&tab=camp),
-   so a copied link, or the link in an emailed report, reopens the calculator with those numbers. */
+/* A shared link carries every number that differs from the example in its hash (#ltn.spots=120&tab=camp):
+   "Copy link to these numbers" and the link in an emailed report build one. The page reads it on load,
+   then clears the address bar, which never changes as the visitor edits. */
 const hashParams = (tab = state.tab) => hashFor(state, tab);
 function shareURL(tab){ const h = hashParams(tab); return location.href.split('#')[0] + (h ? '#'+h : ''); }
-function saveHash(){ const h = hashParams(); if(h !== location.hash.slice(1)) history.replaceState(null, '', h ? '#'+h : location.pathname+location.search); }
 function loadHash(){
   const q = new URLSearchParams(location.hash.slice(1)), inp = readInputs(q);
   state.ltn = inp.ltn; state.camp = inp.camp;
+  if(location.hash) history.replaceState(null, '', location.pathname + location.search);
   return ['ltn','camp','both'].includes(q.get('tab')) ? q.get('tab') : 'ltn';
 }
 
@@ -646,7 +647,6 @@ function renderResults(){
   clearTimeout(liveTimer);
   liveTimer = setTimeout(()=>{ document.getElementById('live').textContent =
     `${ret===null?'No costs entered.':`Return ${ret.toFixed(2)}x.`} You come out ${profit>=0?'ahead':'behind'} by ${$(Math.abs(profit))}.`; }, 700);
-  saveHash();
 
   const labels = (!both && r.camp) ? MON : Array.from({length:MONTHS},(_,i)=>String(i+1+(p2?12:0)));
   const mo = r.mo;

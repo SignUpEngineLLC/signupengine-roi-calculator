@@ -32,10 +32,10 @@ the folder: `py -3 -m http.server 8765 --bind 127.0.0.1`, then open http://127.0
 ## Sharing numbers by link
 
 The URL hash holds every number that differs from the example, for example
-`#tab=camp&camp.fspots=60&camp.fprice=625`. Copying the address bar, the report's
-"Copy link to these numbers" button, and the report's "Open the calculator with these numbers"
-link all reopen the calculator with those numbers. Use it to send a prospect a pre-filled
-calculator. Values are validated on load (`readInputs` in `lib/calc.js`); unknown keys are ignored.
+`#tab=camp&camp.fspots=60&camp.fprice=625`. The report's "Copy link to these numbers" button
+and its "Open the calculator with these numbers" link both build one. Use it to send a prospect a
+pre-filled calculator. The page reads the hash on load and then clears the address bar, which never
+changes while someone edits (so reloading starts from the example numbers). Values are validated on load (`readInputs` in `lib/calc.js`); unknown keys are ignored.
 
 ## The emailed report
 
