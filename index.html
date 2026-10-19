@@ -198,6 +198,7 @@ body{padding-bottom:110px}
 .fl textarea{resize:vertical;min-height:64px}
 .fl input:focus-visible,.fl select:focus-visible,.fl textarea:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 .fl small{font-size:12px;color:var(--muted)}
+.fl .opt{font-weight:500;margin-left:4px}
 .fl.err input{border-color:#c0392b}
 .fl .msg{font-size:12px;color:#c0392b;display:none}.fl.err .msg{display:block}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -381,13 +382,13 @@ fieldset.fl{border:0;margin:0;padding:0}
     </div>
     <div class="two">
       <label class="fl" data-req data-email><span>Your email</span><input name="email" type="email" autocomplete="email" maxlength="254"><span class="msg">Please add a valid email.</span></label>
-      <label class="fl"><span>Your role</span><select name="role"><option value="">Choose one (optional)</option><option>Director of Tennis</option><option>General Manager</option><option>COO</option><option>CEO or Owner</option><option>Program Director</option><option>Other</option></select></label>
+      <label class="fl"><span>Your role <span class="opt">optional</span></span><select name="role"><option value="">Choose one</option><option>Director of Tennis</option><option>General Manager</option><option>COO</option><option>CEO or Owner</option><option>Program Director</option><option>Other</option></select></label>
     </div>
     <details class="share">
       <summary>Also email it to your CEO, COO or colleagues</summary>
       <div class="share-b">
         <label class="fl" data-cc><span>Their email addresses</span><input name="cc" maxlength="800" placeholder="ceo@yourclub.com, coo@yourclub.com"><small>Up to three, separated by commas. They get the same report, with your note at the top.</small><span class="msg">Please enter up to three valid email addresses, separated by commas.</span></label>
-        <label class="fl"><span>A short note for them (optional)</span><textarea name="note" maxlength="500" placeholder="This is the program I mentioned. Worth a look before our budget meeting."></textarea></label>
+        <label class="fl"><span>A short note for them <span class="opt">optional</span></span><textarea name="note" maxlength="500" placeholder="This is the program I mentioned. Worth a look before our budget meeting."></textarea></label>
       </div>
     </details>
     <label class="chk"><input type="checkbox" name="optin"> Send me occasional ideas for growing club programs. You can unsubscribe anytime.</label>
