@@ -5,8 +5,8 @@ compatibility_date = "2025-10-01"
 workers_dev = true
 
 [vars]
-PAGE_URL = "https://signupenginellc.github.io/signupengine-roi-calculator/"
-ALLOWED_ORIGINS = "https://signupenginellc.github.io"
+PAGE_URL = "https://roi.signupengine.io/"
+ALLOWED_ORIGINS = "https://roi.signupengine.io,https://signupenginellc.github.io"
 FROM_EMAIL = "peter@signupengine.io"
 FROM_NAME = "Peter at SignUpEngine"
 REPLY_TO = "peter@signupengine.io"

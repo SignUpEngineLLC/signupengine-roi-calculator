@@ -2,7 +2,8 @@
 
 A one-page calculator that shows a club what an adult beginner program or summer camp pays back
 with SignUpEngine. Published with GitHub Pages at
-https://signupenginellc.github.io/signupengine-roi-calculator/
+https://roi.signupengine.io/ (custom domain: `CNAME` file + a CNAME record at register.com;
+the old github.io address forwards here)
 
 ## ⚠ This repo and its site are public
 
@@ -66,7 +67,7 @@ From the `worker/` folder:
 
 1. `npm install`, then `npx wrangler login` (approve in the browser, signed in to Cloudflare).
 2. `npm run deploy`. Wrangler prints the URL, `https://signupengine-roi-report.<subdomain>.workers.dev`.
-3. Cloudflare dashboard → Turnstile → Add widget: hostname `signupenginellc.github.io`, mode Managed.
+3. Cloudflare dashboard → Turnstile → Add widget: hostnames `roi.signupengine.io` and `signupenginellc.github.io`, mode Managed.
    Put the **site key** in `TURNSTILE_SITE_KEY` in `index.html`, and the **secret key** in the Worker:
    `npx wrangler secret put TURNSTILE_SECRET`.
 4. `npx wrangler secret put SENDLAYER_API_KEY` and paste the key from SendLayer → Settings → API keys.
