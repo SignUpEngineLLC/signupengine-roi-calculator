@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `npm run dev` (gitignored). Dry run returns the emails instead of sending.
+DRY_RUN=1
+ALLOW_NO_TURNSTILE=1
+ALLOWED_ORIGINS=http://127.0.0.1:8765
+PAGE_URL=http://127.0.0.1:8765/

@@ -336,7 +336,7 @@ fieldset.fl{border:0;margin:0;padding:0}
         <div id="chart"></div>
       </div>
       <div class="how" id="fine"></div>
-      <div class="cta"><p>Want to see this with your club's real numbers? We'll walk you through it in 15 minutes.</p><a href="https://signupengine.io" target="_blank" rel="noopener">Talk to SignUpEngine</a></div>
+      <div class="cta"><p>Want to see this with your club's real numbers? We'll walk you through it in 15 minutes.</p><a href="https://signupengine.io/contact-us/" target="_blank" rel="noopener">Talk to SignUpEngine</a></div>
     </section>
   </div>
 </div>
@@ -379,6 +379,7 @@ fieldset.fl{border:0;margin:0;padding:0}
       </div>
     </details>
     <label class="chk"><input type="checkbox" name="optin"> Send me occasional ideas for growing club programs. You can unsubscribe anytime.</label>
+    <div id="ts"></div>
     <p class="ex-warn" id="ex-warn" hidden>You're still using our example numbers, so the report will say so. Change them in the calculator first for a report about your club.</p>
     <div class="rform-f">
       <button type="button" class="lnk" id="just-preview">Preview the report first</button>
@@ -406,198 +407,23 @@ fieldset.fl{border:0;margin:0;padding:0}
   <div id="pv-email"></div>
 </div>
 
-<script>
-const MONTHS = 12;
-const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+<script type="module">
+import {MONTHS, MON, PROGRAMS, DEFAULTS, REG_MONTHS, CAPPED, $, int, kfmt, calc as calcFor, combine, readInputs, hashParams as hashFor} from './lib/calc.js';
+import {esc, isExample as isExampleFor, reportData, previewHTML} from './lib/report.js';
 
-const PROGRAMS = {
-  ltn: {name:'Adult beginner program', who:'players', session:'session',
-    fields:[
-      {g:'p', key:'sessions', label:'Sessions per year', min:1, max:12, step:1},
-      {g:'p', key:'spots', label:'Spots per session (all class times)', min:0, max:400, step:5},
-      {g:'p', key:'full', label:'How full sessions get', min:0, max:100, step:5, suf:'%'},
-      {g:'p', key:'price', label:'Price', min:0, max:300, step:1, pre:'$'},
-      {g:'p', key:'friend', label:'Paying players who bring a free friend', min:0, max:100, step:5, suf:'%'},
-      {g:'c', key:'setup', label:'One-time setup', min:0, max:10000, step:50, pre:'$'},
-      {g:'c', key:'ads', label:'Digital ads per session', min:0, max:10000, step:50, pre:'$', hint:'Billed to your card by Meta or Google, not SignUpEngine'},
-      {g:'c', key:'fee', label:'SignUpEngine platform per month', min:0, max:3000, step:25, pre:'$', wide:true, hint:'Ad management, campaign monitoring, eblasts and registration support'},
-      {g:'s', key:'keep', label:'Keep playing after the program', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'s', key:'renew', label:'Of those, still playing next year', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'s', key:'spend', label:'What they spend', min:0, max:12000, step:50, pre:'$'}
-    ]},
-  camp: {name:'Summer camps', who:'campers', session:'camp week',
-    fields:[
-      {g:'x', key:'lastCampers', label:'Campers last summer', min:0, max:5000, step:5},
-      {g:'x', key:'lastRev', label:'Camp revenue last summer', min:0, max:3000000, step:1000, pre:'$'},
-      {g:'x', key:'growNow', label:'Camper growth this summer with SignUpEngine', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'p', key:'sessions', label:'Camp weeks per summer', min:1, max:14, step:1},
-      {g:'p', key:'wpc', label:'Average weeks per camper', min:1, max:14, step:0.1},
-      {g:'e', key:'early', label:'Sign up in January (early bird)', min:0, max:80, step:5, suf:'%', row:true},
-      {g:'t', key:'fspots', min:0, max:400, step:1}, {g:'t', key:'ffull', min:0, max:100, step:5}, {g:'t', key:'fprice', min:0, max:3000, step:5},
-      {g:'t', key:'hspots', min:0, max:400, step:1}, {g:'t', key:'hfull', min:0, max:100, step:5}, {g:'t', key:'hprice', min:0, max:3000, step:5},
-      {g:'c', key:'setup', label:'One-time setup', min:0, max:10000, step:50, pre:'$'},
-      {g:'c', key:'ads', label:'Digital ads for the season', min:0, max:20000, step:50, pre:'$', hint:'Billed to your card by Meta or Google, not SignUpEngine'},
-      {g:'c', key:'fee', label:'SignUpEngine platform per month', min:0, max:3000, step:25, pre:'$', wide:true, hint:'Ad management, campaign monitoring, eblasts and registration support'},
-      {g:'n', key:'grow', label:'Camp growth next season', min:0, max:50, step:1, suf:'%', row:true},
-      {g:'n', key:'back', label:'Campers who come back next summer', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'s', key:'keep', label:'Campers who join a year-round program', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'s', key:'renew', label:'Of those, still enrolled next year', min:0, max:100, step:5, suf:'%', row:true},
-      {g:'s', key:'spend', label:'What they spend', min:0, max:12000, step:50, pre:'$'}
-    ]}
-};
-const DEFAULTS = {
-  ltn:  {sessions:4,  spots:80, full:80, price:59,  friend:50, setup:1000, fee:600, ads:600,  keep:20, renew:70, spend:1200, spendMode:'year'},
-  camp: {sessions:10, wpc:1.7, fspots:40, ffull:85, fprice:585, hspots:24, hfull:70, hprice:350, early:40, grow:5, back:40, setup:1000, fee:795, ads:3000, keep:10, renew:70, spend:2400, spendMode:'year',
-          mode:'new', lastCampers:80, lastRev:128000, growNow:25}
-};
 const state = {tab:'ltn', view:'money', period:1, ltn:{...DEFAULTS.ltn}, camp:{...DEFAULTS.camp}};
+const calc = key => calcFor(state, key);
 let liveTimer;
 
 /* The URL hash holds every number that differs from the example (#ltn.spots=120&tab=camp),
    so a copied link, or the link in an emailed report, reopens the calculator with those numbers. */
-const CHOICES = {mode:['new','existing'], spendMode:['year','month']};
-// inputs that can't go past their slider's max (percentages and counts); the rest can be typed higher
-const CAPPED = ['full','friend','keep','renew','back','grow','early','sessions','ffull','hfull','wpc','growNow'];
-function hashParams(tab = state.tab){
-  const q = new URLSearchParams();
-  if(tab!=='ltn') q.set('tab', tab);
-  for(const key of ['ltn','camp']) for(const k of Object.keys(DEFAULTS[key]))
-    if(state[key][k]!==DEFAULTS[key][k]) q.set(`${key}.${k}`, state[key][k]);
-  return q.toString();
-}
+const hashParams = (tab = state.tab) => hashFor(state, tab);
 function shareURL(tab){ const h = hashParams(tab); return location.href.split('#')[0] + (h ? '#'+h : ''); }
 function saveHash(){ const h = hashParams(); if(h !== location.hash.slice(1)) history.replaceState(null, '', h ? '#'+h : location.pathname+location.search); }
 function loadHash(){
-  const q = new URLSearchParams(location.hash.slice(1));
-  for(const [name, raw] of q){
-    const [key, k] = name.split('.');
-    if(!k || !DEFAULTS[key] || !(k in DEFAULTS[key])) continue;
-    if(CHOICES[k]){ if(CHOICES[k].includes(raw)) state[key][k] = raw; continue; }
-    const f = PROGRAMS[key].fields.find(x=>x.key===k), n = Number(raw);
-    if(f && raw!=='' && Number.isFinite(n)) state[key][k] = Math.min(CAPPED.includes(k) ? f.max : 10000000, Math.max(f.min, n));
-  }
-  for(const key of ['ltn','camp']) state[key].sessions = Math.max(1, Math.round(state[key].sessions));
-  if(state.camp.wpc > state.camp.sessions) state.camp.wpc = state.camp.sessions;
+  const q = new URLSearchParams(location.hash.slice(1)), inp = readInputs(q);
+  state.ltn = inp.ltn; state.camp = inp.camp;
   return ['ltn','camp','both'].includes(q.get('tab')) ? q.get('tab') : 'ltn';
-}
-
-const $ = n => (n<0?'−$':'$') + Math.round(Math.abs(n)).toLocaleString('en-US');
-const int = n => Math.round(n).toLocaleString('en-US');
-const kfmt = n => n>=1000 ? '$'+(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,'')+'k' : '$'+Math.round(n);
-
-/* Year one. Program revenue and costs are averaged across the 12 months;
-   players who stay add to each month after their session. */
-/* Camps follow a calendar year: launch in January, registration and ads through August,
-   camp from mid-June, year-round families from September, planning next season in Nov-Dec. */
-const REG_MONTHS = 8;   // January through August
-// typical shape of registrations after January: steady through spring, tapering into the summer
-const REG_CURVE = [12,12,13,14,12,8,4];   // Feb..Aug
-function regProfile(early){
-  const e = Math.min(80, Math.max(0, early))/100, tot = REG_CURVE.reduce((a,b)=>a+b,0);
-  return [e, ...REG_CURVE.map(w=>(1-e)*w/tot), 0,0,0,0];
-}
-function calcCamp(v){
-  const period = state.period, p2 = period===2, existing = v.mode==='existing';
-  let fWk=0, hWk=0, fRegs=0, hRegs=0, weeks=0, sF=0, sH=0, thisPlayers, players, regRev, totalRev, per=0, added=0;
-  if(existing){
-    // a camp they already run: only growth over last summer counts toward the return
-    // with no campers last summer there is no revenue per camper to grow from
-    per = v.lastCampers>0 ? v.lastRev/v.lastCampers : 0;
-    thisPlayers = Math.round(v.lastCampers*(1+v.growNow/100));
-    players = p2 ? Math.round(thisPlayers*(1+v.grow/100)) : thisPlayers;
-    added = players - v.lastCampers; regRev = added*per; totalRev = v.lastRev + regRev;
-  } else {
-    fWk = Math.round(v.fspots*v.ffull/100); hWk = Math.round(v.hspots*v.hfull/100);
-    fRegs = fWk*v.sessions; hRegs = hWk*v.sessions; weeks = fRegs+hRegs;
-    thisPlayers = Math.round(weeks/Math.max(1, v.wpc));          // this season's campers
-    // next season grows by the growth rate; returning families fill part of it
-    const g = p2 ? v.grow/100 : 0;
-    sF = p2 ? Math.round(fRegs*(1+g)) : fRegs; sH = p2 ? Math.round(hRegs*(1+g)) : hRegs;
-    players = p2 ? Math.round((sF+sH)/Math.max(1, v.wpc)) : thisPlayers;
-    regRev = sF*v.fprice + sH*v.hprice; totalRev = regRev;
-  }
-  const returning = p2 ? Math.min(players, Math.round(thisPlayers*v.back/100)) : 0, newCampers = players-returning;
-  const adsSeason = p2 ? v.ads*newCampers/Math.max(1,thisPlayers) : v.ads;   // ads only need to find new campers
-  const setup = p2 ? 0 : v.setup, feeYear = v.fee*MONTHS;
-  const cost = setup + feeYear + adsSeason;
-  // kids who join year-round programs; for an existing camp, only from the campers SignUpEngine added
-  const y1Stayers = (existing ? Math.max(0, thisPlayers - v.lastCampers) : thisPlayers)*v.keep/100;
-  const carry = p2 ? y1Stayers*v.renew/100 : 0;                // still enrolled a year later
-  const joinNew = existing ? (p2 ? Math.max(0, players - thisPlayers)*v.keep/100 : y1Stayers)
-    : (p2 ? newCampers : players)*v.keep/100;                  // new year-round families from this summer
-  const spendMo = v.spendMode==='month' ? v.spend : v.spend/12;
-  let cumP = 0;
-  const prof = regProfile(v.early);
-  const mo = Array.from({length:MONTHS}, (_,i)=>{
-    const reg = prof[i];
-    cumP += players*reg;
-    const stayers = carry + (i>=8 ? joinNew : 0);
-    return {players:cumP, campRev: regRev*reg, campTotal: totalRev*reg, campLast: existing ? v.lastRev*reg : 0, stayers, stay:stayers*spendMo,
-      inn: regRev*reg + stayers*spendMo,
-      cost: v.fee + adsSeason*reg + (i===0?setup:0)};
-  });
-  const stayYear = mo.reduce((a,x)=>a+x.stay,0);
-  const bands = [
-    {a:-0.5, b:4.5, label:'Registration opens'},
-    {a:4.5, b:7.5, label:'Camp + registration'},
-    {a:7.5, b:9.5, label:'Year-round'},
-    {a:9.5, b:11.5, label:'Plan ahead'}
-  ];
-  return {key:'camp', v, camp:true, existing, per, added, totalRev, lastRev:v.lastRev, lastCampers:v.lastCampers, campInfo:{fWk, hWk, fRegs, hRegs, weeks}, season:{fRegs:sF, hRegs:sH, weeks:sF+sH}, thisPlayers, marks:[], bands, period, setup, carry, y1Stayers,
-    perSession:fWk+hWk, players, paid:players, free:0, regRev, adsYear:adsSeason, adsSeason, feeYear, cost,
-    avgCost:(feeYear+adsSeason)/MONTHS, mo, stayYear, totalIn:regRev+stayYear,
-    stayersEnd: mo[MONTHS-1].stayers, stayEnd: mo[MONTHS-1].stay, returning, newCampers, joinNew};
-}
-function calc(key){
-  if(key==='camp') return calcCamp(state.camp);
-  const v = state[key], camp = false;
-  let perSession, players, paid, free, regRev, campInfo = null;
-  if(camp){
-    // camper-weeks for each option, then actual kids = camper-weeks / average weeks per camper
-    const fWk = Math.round(v.fspots*v.ffull/100), hWk = Math.round(v.hspots*v.hfull/100);
-    const fRegs = fWk*v.sessions, hRegs = hWk*v.sessions, weeks = fRegs+hRegs;
-    perSession = fWk+hWk;
-    players = Math.round(weeks/Math.max(1, v.wpc));
-    paid = players; free = 0;
-    regRev = fRegs*v.fprice + hRegs*v.hprice;
-    campInfo = {fWk, hWk, fRegs, hRegs, weeks};
-  } else {
-    perSession = Math.round(v.spots*v.full/100);   // whole players per session
-    players = perSession*v.sessions;
-    const bring = v.friend/100;              // share of paying players who bring one free friend
-    const share = bring/(1+bring);           // share of all players who came free
-    paid = Math.round(players*(1-share)); free = players-paid;   // whole players
-    regRev = paid*v.price;
-  }
-  const adsYear = camp ? v.ads : v.ads*v.sessions;
-  const feeYear = v.fee*MONTHS;
-  const period = state.period, setup = period===1 ? v.setup : 0;
-  const cost = setup + feeYear + adsYear;
-  const avgIn = regRev/MONTHS, avgCost = (feeYear+adsYear)/MONTHS;
-  // when players arrive and when the ones who stay start spending
-  const arrivals = Array(MONTHS).fill(0), joins = Array(MONTHS).fill(0), counts = Array(MONTHS).fill(0);
-  const marks = [];
-  // joins = when stayers start spending (month after); counts = when they show as still playing
-  if(camp){ const k = players*v.keep/100; arrivals[6] += players; joins[8] += k; counts[8] += k; marks.push({i:6, label:'Camp season', add:players, unitLabel:'campers'}); }   // camp in July, year-round programs from September
-  else for(let i=0;i<v.sessions;i++){ const m = Math.floor(MONTHS*i/v.sessions), k = perSession*v.keep/100;
-    arrivals[m] += perSession; if(m+1<MONTHS) joins[m+1] += k; counts[Math.min(m+1, MONTHS-1)] += k;
-    marks.push({i:m, label:`Session ${i+1}`, short:`S${i+1}`, add:perSession}); }
-  // next 12 months: players who stayed in the first 12 months carry over, less drop-off
-  const y1Stayers = counts.reduce((a,b)=>a+b,0);
-  const carry = period===2 ? y1Stayers*v.renew/100 : 0;
-  let cumP = 0, cumS = carry, cumC = carry;
-  const spendMo = v.spendMode==='month' ? v.spend : v.spend/12;
-  const mo = arrivals.map((a,i)=>{ cumP += a; cumS += joins[i]; cumC += counts[i]; return {players:cumP, stayers:cumC, stay:cumS*spendMo, inn:avgIn+cumS*spendMo, cost:avgCost+(i===0?setup:0)}; });
-  const stayYear = mo.reduce((s,x)=>s+x.stay,0);
-  return {key, v, camp, campInfo, marks, period, setup, carry, y1Stayers, perSession, players, paid, free, regRev, adsYear, feeYear, cost, avgIn, avgCost, mo, stayYear,
-    totalIn: regRev+stayYear, stayersEnd: mo[MONTHS-1].stayers, stayEnd: mo[MONTHS-1].stay};
-}
-function combine(a, b){
-  const mo = a.mo.map((x,i)=>{ const y=b.mo[i]; return {players:x.players+y.players, stayers:x.stayers+y.stayers, stay:x.stay+y.stay, inn:x.inn+y.inn, cost:x.cost+y.cost}; });
-  const sum = k => a[k]+b[k];
-  return {both:true, players:sum('players'), paid:sum('paid'), free:sum('free'), regRev:sum('regRev'), adsYear:sum('adsYear'), feeYear:sum('feeYear'),
-    cost:sum('cost'), avgCost:sum('avgCost'), stayYear:sum('stayYear'), totalIn:sum('totalIn'), stayersEnd:sum('stayersEnd'), stayEnd:sum('stayEnd'),
-    setup: a.setup+b.setup, carry: a.carry+b.carry, y1Stayers: a.y1Stayers+b.y1Stayers, period: a.period, fee: a.v.fee+b.v.fee, mo, marks: a.marks.concat(b.marks), a, b};
 }
 
 /* ---------- inputs ---------- */
@@ -951,130 +777,15 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setT
 // The server endpoint that emails the report. Until it exists, "Email me this report" becomes
 // "See my report": the preview opens straight away, to print, save as PDF or share by link.
 const REPORT_ENDPOINT = '';
+// Cloudflare Turnstile site key (public; the secret lives in the Worker). Proves a person sent the form.
+const TURNSTILE_SITE_KEY = '';
 const rep = {type:'ltn', form:{}};
-const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const xr = (i,c) => c>0 ? (i/c).toFixed(2)+'x' : 'n/a';
-function bothPeriods(){
-  const saved = state.period, out = {};
-  [1,2].forEach(pp=>{ state.period = pp; out[pp] = {a:calc('ltn'), b:calc('camp')}; });
-  state.period = saved; return out;
-}
 // a real file, not a data: URI: Gmail and Outlook block data: images in email
 const SUE_LOGO = new URL('assets/signupengine-logo.png', location.href).href;
-// true when a program's inputs are still the example defaults
-// (only the inputs the current camp type uses: a new camp ignores last summer, an existing one ignores the weekly table)
-const EXISTING_ONLY = ['lastCampers','lastRev','growNow'], NEW_ONLY = ['sessions','wpc','fspots','ffull','fprice','hspots','hfull','hprice'];
-const isExample = key => Object.keys(DEFAULTS[key]).every(k => {
-  if(k==='mode') return true;
-  if(key==='camp' && (state.camp.mode==='existing' ? NEW_ONLY : EXISTING_ONLY).includes(k)) return true;
-  return state[key][k]===DEFAULTS[key][k];
-});
-function basisHTML(key){
-  const v = state[key], sp = `${$(v.spend)} a ${v.spendMode!=='month'?'year':'month'}`;
-  const items = key==='ltn' ? [
-    `${v.sessions} sessions a year, ${v.spots} spots each, ${v.full}% full`,
-    `${$(v.price)} per player, and ${v.friend}% of paying players bring a free friend`,
-    `${v.keep}% keep playing, spending ${sp}, and ${v.renew}% of them are still playing a year later`,
-    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads per session`
-  ] : v.mode==='existing' ? [
-    `${v.lastCampers} campers last summer and ${$(v.lastRev)} in camp revenue, about ${$(v.lastRev/Math.max(1,v.lastCampers))} per camper`,
-    `${v.growNow}% more campers this summer with SignUpEngine, and ${v.early}% sign up in January`,
-    `Only growth over last summer counts toward the return`,
-    `${v.keep}% of new campers join a year-round program, spending ${sp}, and ${v.renew}% stay enrolled the next year`,
-    `Next season grows ${v.grow}%, and ${v.back}% of campers come back`,
-    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads for the season`
-  ] : [
-    `${v.sessions} camp weeks. Full-Day: ${v.fspots} spots at ${$(v.fprice)}, ${v.ffull}% full. Half-Day: ${v.hspots} spots at ${$(v.hprice)}, ${v.hfull}% full`,
-    `Campers stay ${v.wpc} weeks on average, and ${v.early}% sign up in January`,
-    `${v.keep}% join a year-round program, spending ${sp}, and ${v.renew}% stay enrolled the next year`,
-    `Next season grows ${v.grow}%, and ${v.back}% of campers come back`,
-    `${$(v.setup)} setup, ${$(v.fee)} a month for the platform, and ${$(v.ads)} in digital ads for the season`
-  ];
-  return `<ul>${items.map(t=>`<li>${t}</li>`).join('')}</ul>`;
-}
+const isExample = key => isExampleFor(state, key);
 function reportHTML(type){
-  const P = bothPeriods(), f = rep.form;
-  const club = f.club || 'Your club', name = f.name || 'Your name', role = f.role ? `, ${f.role}` : '';
-  const today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
-  const A1=P[1].a, A2=P[2].a, B1=P[1].b, B2=P[2].b;
-  const pick = pp => type==='ltn' ? P[pp].a : type==='camp' ? P[pp].b : combine(P[pp].a, P[pp].b);
-  const r1 = pick(1), r2 = pick(2);
-  const cols = type==='camp' ? ['This camp season','Next camp season'] : ['Your first 12 months','The next 12 months'];
-  const title = type==='ltn' ? 'Adult Beginner Program: what it pays back'
-    : type==='camp' ? 'Summer Camps: what they pay back' : 'Adult Beginner Program and Summer Camps: what they pay back';
-  const B = n => `<b>${n}</b>`;
-  const grows = (a,b) => b>=a*2 ? 'more than doubles' : b>=a ? 'grows' : 'comes in';
-  const fromTxt = (a,b) => b>=a ? 'up from' : 'down from';
-  let p1, p2;
-  if(type==='ltn'){
-    const carry = int(A2.carry), fresh = Math.round(A2.stayersEnd) - Math.round(A2.carry);
-    p1 = [ `${B(int(A1.players)+' new adults')} sign up, bringing in ${B($(A1.regRev))}`,
-      A1.stayersEnd>0.5 ? `${B(int(A1.stayersEnd)+' keep playing')}, worth ${B($(A1.stayYear))} this year` : null,
-      `${B('Total investment: '+$(A1.cost))} for setup, the platform and digital ads` ];
-    p2 = [ `${B('No setup fee')}, so your investment drops to ${B($(A2.cost))}`,
-      A2.stayersEnd>0.5 ? `${B(int(A2.stayersEnd)+' adults')} are playing by month 24: ${carry} from your first year plus ${fresh} new` : null,
-      `Revenue ${grows(A1.totalIn,A2.totalIn)} ${A2.totalIn>=A1.totalIn?'to':'at'} ${B($(A2.totalIn))}, ${fromTxt(A1.totalIn,A2.totalIn)} ${$(A1.totalIn)}` ];
-  } else if(type==='camp' && B1.existing){
-    p1 = [ `${B(int(B1.added)+' more campers')} than last summer, at about ${$(B1.per)} each, bringing in ${B($(B1.regRev))} more`,
-      `Camp revenue goes from ${$(B1.lastRev)} to ${B($(B1.totalRev))}`,
-      B1.stayersEnd>0.5 ? `${B(int(B1.stayersEnd)+' of the new campers')} join year-round programs, worth ${B($(B1.stayYear))} by December` : null,
-      `${B('Total investment: '+$(B1.cost))} for setup, the platform and digital ads` ];
-    p2 = [ `Camp grows another ${B(B1.v.grow+'%')} to ${B(int(B2.players)+' campers')}, ${int(B2.added)} more than before SignUpEngine`,
-      `${B('No setup fee')}, and digital ads only need to find new campers, so your investment drops to ${B($(B2.cost))}`,
-      B2.stayersEnd>0.5 ? `${B(int(B2.stayersEnd)+' kids')} from your new campers in year-round programs by December` : null ];
-  } else if(type==='camp'){
-    const per = B1.players>0 ? B1.regRev/B1.players : 0, cpc = B1.players>0 ? B1.cost/B1.players : 0;
-    p1 = [ `${B(int(B1.players)+' campers')} sign up, bringing in ${B($(B1.regRev))}`,
-      `Each camper brings in about ${B($(per))}, for about ${B($(cpc))} of your investment`,
-      B1.stayersEnd>0.5 ? `${B(int(B1.stayersEnd)+' kids')} join year-round programs, worth ${B($(B1.stayYear))} by December` : null,
-      `${B('Total investment: '+$(B1.cost))} for setup, the platform and digital ads` ];
-    p2 = [ `Camp grows ${B(B1.v.grow+'%')} to ${B(int(B2.players)+' campers')}, and ${int(B2.returning)} of them come back`,
-      `${B('No setup fee')}, and digital ads only need to find new campers, so your investment drops to ${B($(B2.cost))}`,
-      B2.stayersEnd>0.5 ? `${B(int(B2.stayersEnd)+' kids')} in year-round programs by December` : null ];
-  } else {
-    p1 = [ `${B('Adult Beginner Program: '+xr(A1.totalIn,A1.cost))}, with ${int(A1.players)} new adults and ${int(A1.stayersEnd)} who keep playing`,
-      B1.existing ? `${B('Summer Camps: '+xr(B1.totalIn,B1.cost))}, with ${int(B1.added)} more campers than last summer` : `${B('Summer Camps: '+xr(B1.totalIn,B1.cost))}, with ${int(B1.players)} campers and ${int(B1.stayersEnd)} who join year-round programs`,
-      `${B('Total investment: '+$(r1.cost))} for setup, the platform and digital ads across both` ];
-    p2 = [ `${B('Adult Beginner Program: '+xr(A2.totalIn,A2.cost))}, as adults who stayed keep paying`,
-      `${B('Summer Camps: '+xr(B2.totalIn,B2.cost))}, as camp grows ${B1.v.grow}% and ${int(B2.returning)} campers come back`,
-      `${B('No setup fees')}, so your investment drops to ${B($(r2.cost))}` ];
-  }
-  const pts = a => `<ul class="em-pts">${a.filter(Boolean).map(t=>`<li>${t}</li>`).join('')}</ul>`;
-  const hero = r => `<div class="em-hero"><div><div class="k">Your return</div><div class="big">${xr(r.totalIn,r.cost)}</div><div class="k">${r.cost>0?`$${(r.totalIn/r.cost).toFixed(2)} back for every $1 invested`:''}</div></div>
-    <div><div class="k">You come out ${r.totalIn>=r.cost?'ahead':'behind'}</div><div class="mid">${$(Math.abs(r.totalIn-r.cost))}</div><div class="k">${r.totalIn>=r.cost?'more':'less'} than you invest</div></div></div>`;
-  const progs = type==='both' ? [A1,B1] : [r1];
-  const sum = k => progs.reduce((t,x)=>t+x[k],0);
-  const fees = type==='both' ? `${$(A1.v.fee)} and ${$(B1.v.fee)} a month` : `${$(r1.v.fee)} a month`;
-  const covers = `<div class="em-sec"><div class="em-sec-h">What your investment covers</div><div class="em-inv">
-    <div><span>One-time setup</span><b>${$(sum('setup'))}</b></div>
-    <div><span>SignUpEngine platform<small>${fees}: ad management, campaign monitoring and optimization, eblasts, and registration support</small></span><b>${$(sum('feeYear'))}</b></div>
-    <div><span>Digital ads<small>Runs in your own ad account and is billed to your card by Meta or Google. None of it goes to SignUpEngine.</small></span><b>${$(sum('adsYear'))}</b></div>
-    <div class="tot"><span>Total investment, ${cols[0].replace('Your first','first').toLowerCase()}</span><b>${$(r1.cost)}</b></div></div></div>`;
-  const keys = type==='both' ? ['ltn','camp'] : [type], ex = keys.map(isExample);
-  const allEx = ex.every(Boolean), noneEx = !ex.some(Boolean);
-  const basisH = allEx ? 'Based on example numbers' : noneEx ? 'Based on your numbers' : 'Based on these numbers';
-  const tag = k => allEx || noneEx ? '' : `<span>${isExample(k)?'example numbers':'your numbers'}</span>`;
-  const exNote = allEx ? `<p class="em-ex">These are SignUpEngine's example numbers, not your club's. Put in your own in the calculator for a report that reflects your club.</p>`
-    : !noneEx ? `<p class="em-ex">One program still uses SignUpEngine's example numbers. Put in your own in the calculator for a report that reflects your club.</p>` : '';
-  const basis = type==='both'
-    ? `<h3>Adult Beginner Program${tag('ltn')}</h3>${basisHTML('ltn')}<h3>Summer Camps${tag('camp')}</h3>${basisHTML('camp')}` : basisHTML(type);
-  return `<div class="em">
-    <div class="em-top"><img src="${SUE_LOGO}" alt="SignUpEngine" width="76" height="30"><div class="em-date">${today}</div></div>
-    <div class="em-body">
-      <p class="em-club">${esc(club)}</p>
-      <h1>${title}</h1>
-      <p class="em-for">Prepared for ${esc(name)}${esc(role)}</p>
-      <div class="em-sec"><div class="em-sec-h">${cols[0]}</div>${hero(r1)}${pts(p1)}</div>
-      <div class="em-sec next"><div class="em-sec-h">${cols[1]}${r1.cost>0&&r2.cost>0?`<span>${fromTxt(r1.totalIn/r1.cost, r2.totalIn/r2.cost)} ${xr(r1.totalIn,r1.cost)}</span>`:''}</div>${hero(r2)}${pts(p2)}</div>
-      ${covers}
-      <div class="em-basis"><h2>${basisH}</h2>${exNote}${basis}</div>
-      <div class="em-cta"><p>Want to check these against your club's real numbers? We'll walk you through it in 15 minutes.</p>
-        <a class="b" href="https://signupengine.io" target="_blank" rel="noopener">Book a 15-minute walkthrough</a>
-        <a class="l" href="${esc(shareURL(type))}" target="_blank" rel="noopener">Open the calculator with these numbers</a></div>
-    </div>
-    <div class="em-foot"><p>These are estimates based on the numbers entered on ${today}. Your results will depend on your club, your pricing and your market.</p>
-      <p>SignUpEngine · signupengine.io · Unsubscribe</p></div>
-  </div>`;
+  const f = rep.form, today = new Date().toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  return previewHTML(reportData(state, type, {name:f.name, club:f.club, role:f.role, today, calcURL:shareURL(type)}), SUE_LOGO);
 }
 function renderPreview(){
   document.querySelectorAll('[data-rt]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.rt===rep.type)));
@@ -1094,8 +805,19 @@ form.querySelectorAll('[name=rtype]').forEach(r=>r.addEventListener('change', ex
 const openBtn = document.getElementById('open-report');
 let opener = null;   // where focus goes back to when the form or preview closes
 function closeAll(){ ov.hidden = true; pv.hidden = true; document.body.style.overflow = ''; if(opener) opener.focus(); }
+// Turnstile loads only when the form first opens, so visitors who never open it don't load it
+let tsWidget = null;
+function loadTurnstile(){
+  if(!TURNSTILE_SITE_KEY || tsWidget!==null) return;
+  tsWidget = 'loading';
+  window.onTurnstileLoad = () => { tsWidget = window.turnstile.render('#ts', {sitekey:TURNSTILE_SITE_KEY, size:'flexible', appearance:'interaction-only'}); };
+  const sc = document.createElement('script');
+  sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit'; sc.async = true;
+  document.head.appendChild(sc);
+}
+const tsToken = () => window.turnstile && tsWidget && tsWidget!=='loading' ? (window.turnstile.getResponse(tsWidget) || '') : '';
 function openForm(){
-  opener = openBtn;
+  opener = openBtn; loadTurnstile();
   form.querySelector(`[name=rtype][value=${state.tab}]`).checked = true; exWarn();
   ov.hidden = false; document.body.style.overflow = 'hidden'; setTimeout(()=>form.querySelector('[name=name]').focus(), 30);
 }
@@ -1134,13 +856,23 @@ form.addEventListener('submit', async e=>{
   try {
     const d = readForm();
     const res = await fetch(REPORT_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({type:d.rtype, name:d.name, club:d.club, email:d.email, role:d.role, cc, note:d.note, optin:d.optin, ltn:state.ltn, camp:state.camp})});
-    if(!res.ok) throw new Error(res.status);
+      body: JSON.stringify({type:d.rtype, name:d.name, club:d.club, email:d.email, role:d.role, cc, note:d.note, optin:d.optin,
+        ltn:state.ltn, camp:state.camp, turnstile:tsToken()})});
+    if(!res.ok){ const out = await res.json().catch(()=>({})); throw Object.assign(new Error(res.status), {status:res.status, out}); }
     openPreview(true);
-  } catch(_) {
-    err.textContent = 'Sorry, we couldn’t send your report just now. Please try again, or use "Preview the report first" to print or save it.';
+  } catch(x) {
+    const field = x.out?.field;
+    err.textContent = x.status===429 ? 'That’s a lot of reports in a row. Please wait a minute and try again.'
+      : field==='links' ? 'Please leave links and web addresses out of your name, club and note.'
+      : field==='cc' ? 'Please check your colleagues’ email addresses.'
+      : field ? 'Please check your details and try again.'
+      : x.out?.error==='human_check' ? 'We couldn’t confirm you’re a person. Please try again.'
+      : 'Sorry, we couldn’t send your report just now. Please try again, or use "Preview the report first" to print or save it.';
     err.hidden = false;
-  } finally { btn.disabled = false; btn.textContent = 'Send my report'; }
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send my report';
+    if(window.turnstile && tsWidget && tsWidget!=='loading') window.turnstile.reset(tsWidget);   // a token works once
+  }
 });
 form.querySelectorAll('[data-req] input, [data-cc] input').forEach(i=>i.addEventListener('input',()=>i.closest('.fl').classList.remove('err')));
 document.querySelectorAll('[data-rt]').forEach(b=>b.addEventListener('click',()=>{ rep.type = b.dataset.rt; renderPreview(); }));

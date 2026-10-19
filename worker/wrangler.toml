@@ -1,0 +1,24 @@
+# Cloudflare Worker that emails the ROI calculator's report through SendLayer. See README.md.
+name = "signupengine-roi-report"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+workers_dev = true
+
+[vars]
+PAGE_URL = "https://signupenginellc.github.io/signupengine-roi-calculator/"
+ALLOWED_ORIGINS = "https://signupenginellc.github.io"
+FROM_EMAIL = "peter@signupengine.io"
+FROM_NAME = "Peter at SignUpEngine"
+REPLY_TO = "peter@signupengine.io"
+LEAD_TO = "peter@signupengine.io"
+TIMEZONE = "America/New_York"
+
+# Secrets, set with `npx wrangler secret put <NAME>` (never in this file, the repo is public):
+#   SENDLAYER_API_KEY   SendLayer → Settings → API keys
+#   TURNSTILE_SECRET    Cloudflare → Turnstile → the widget's secret key
+
+# 5 requests a minute per visitor IP
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2401"
+simple = { limit = 5, period = 60 }
