@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SignUpEngine ROI Calculator</title>
-<meta name="description" content="Enter your club's numbers and see what an adult beginner program or summer camp pays back with SignUpEngine.">
+<meta name="description" content="Enter your club's numbers and see what an intro program or camp pays back with SignUpEngine.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -22,18 +22,18 @@
 /* --purple is for text and lines and lightens in dark mode; --fill stays dark so white text on it stays readable. */
 :root{
   --bg:#f6f4f9; --surface:#ffffff; --ink:#221a2b; --muted:#675e73; --line:#e3dcea;
-  --purple:#75449A; --fill:#75449A; --blue:#1A94BC; --tint:#efe6f6; --soft:#b99ad1; --yr:#2E8B6B;
+  --purple:#75449A; --fill:#75449A; --blue:#1A94BC; --tint:#efe6f6; --soft:#b99ad1; --yr:#2E8B6B;--neg:#C0392B;--ball:#C6D93B;
   --font:"Kumbh Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#15111a; --surface:#1f1926; --ink:#f2edf7; --muted:#a89fb4; --line:#362d41;
-    --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0; color-scheme:dark;
+    --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0;--neg:#F08A7E;--ball:#D7EA4E; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#15111a; --surface:#1f1926; --ink:#f2edf7; --muted:#a89fb4; --line:#362d41;
-  --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0; color-scheme:dark;
+  --purple:#b88ad9; --blue:#56bde2; --tint:#2c2137; --soft:#6d4d87; --yr:#5fc8a0;--neg:#F08A7E;--ball:#D7EA4E; color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;
@@ -69,9 +69,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-o
 .num input{font:inherit;font-size:18px;font-weight:800;color:var(--ink);background:transparent;border:0;width:100%;min-width:0;padding:0;-moz-appearance:textfield}
 .num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .num input:focus-visible{outline:none}
-.num .aff{color:var(--muted);font-weight:700;font-size:14px}
+.num .aff{color:var(--ink);opacity:.55;font-weight:700;font-size:18px}
+.num{justify-content:flex-start;cursor:text}
+.num input:not(.tnum input){width:calc(var(--w,2) * 1ch + 2px);flex:none}
 input[type=range]{width:100%;accent-color:var(--purple);margin:0;height:16px}
-.hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:-2px}
+.hint{font-size:11px;color:var(--muted);line-height:1.35;margin-top:-2px}
+.note.path span{color:var(--purple);font-weight:800;margin:0 2px}
 .note{margin:0;font-size:13px;font-weight:600;background:var(--tint);border-radius:6px;padding:7px 10px;font-variant-numeric:tabular-nums}
 .ctable{display:grid;gap:6px;margin-top:2px}
 .trow{display:grid;grid-template-columns:72px repeat(3,minmax(0,1fr));gap:6px;align-items:center}
@@ -80,7 +83,7 @@ input[type=range]{width:100%;accent-color:var(--purple);margin:0;height:16px}
 .trow .tl{font-size:13px;font-weight:700}
 .tnum{padding:4px 8px;justify-content:flex-end;gap:1px}
 .tnum input{font-size:16px;width:4.4ch;flex:none;text-align:right;field-sizing:content;min-width:1.2ch;max-width:100%}
-.tnum .aff{font-size:13px}
+.tnum .aff{font-size:16px}
 .camp-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--tint);border-radius:8px;overflow:hidden}
 .camp-sum div{padding:9px 12px;display:grid;gap:1px}
 .camp-sum div + div{border-left:1px solid color-mix(in srgb,var(--purple) 18%,transparent)}
@@ -141,6 +144,8 @@ input[type=range]{width:100%;accent-color:var(--purple);margin:0;height:16px}
 .seg button + button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .seg.mini button{font-size:12px;padding:3px 10px}
+.startm{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;color:var(--muted)}
+.startm select{font:inherit;font-size:14px;font-weight:700;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .seg.mode{width:100%}.seg.mode button{flex:1 1 0;padding:8px 6px;font-size:13px;white-space:normal}
 .seg.mode button[aria-pressed="true"]{background:var(--fill);color:#fff}
 .ctl.wide{grid-column:1/-1}
@@ -163,8 +168,23 @@ input[type=range]{width:100%;accent-color:var(--purple);margin:0;height:16px}
 .cmp-b{height:22px;border-radius:3px;max-width:calc(100% - 90px)}
 .cmp-v{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.chart-card{position:relative}
+#chart rect[data-hi]{cursor:crosshair}
+.ctip{position:absolute;z-index:5;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(34,26,43,.16);padding:9px 11px;font-size:12px;line-height:1.4;min-width:180px;max-width:300px}
+.ctip[hidden]{display:none}
+.ctip b{display:block;font-size:13px;margin-bottom:4px}
+.ctip .r{display:flex;justify-content:space-between;align-items:center;gap:14px;font-variant-numeric:tabular-nums}
+.ctip .r span{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+.ctip .r i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ctip .r strong{font-weight:800}
+.ctip .r.sub{padding-left:20px;font-size:11px;opacity:.8}
+.ctip .r.sub span{gap:0}
+.ctip .r.net{margin-top:5px;padding-top:5px;border-top:1px solid var(--line)}
+.ctip .r.net span{color:var(--ink);font-weight:700}
+.ctip .n{white-space:nowrap;margin-top:5px;padding-top:5px;border-top:1px solid var(--line);color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.legend i.dot{width:9px;height:9px;border-radius:50%;background:var(--ball);box-shadow:0 0 0 1px rgba(34,26,43,.25)}
 .chart{width:100%;height:auto;display:block}
 
 .cta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 20px;border-top:1px solid var(--line);padding:18px 2px 0;margin-top:4px;text-align:center}
@@ -316,8 +336,8 @@ fieldset.fl{border:0;margin:0;padding:0}
     </div>
     <div class="top-r">
       <div class="tabs" role="tablist" aria-label="Program">
-        <button type="button" class="tab" role="tab" data-tab="ltn" aria-controls="inputs">Adult beginners</button>
-        <button type="button" class="tab" role="tab" data-tab="camp" aria-controls="inputs">Summer camps</button>
+        <button type="button" class="tab" role="tab" data-tab="ltn" aria-controls="inputs">Intro programs</button>
+        <button type="button" class="tab" role="tab" data-tab="camp" aria-controls="inputs">Camps</button>
         <button type="button" class="tab" role="tab" data-tab="both" aria-controls="inputs">Both programs</button>
       </div>
       <button type="button" class="theme-btn" id="theme-btn"></button>
@@ -350,6 +370,7 @@ fieldset.fl{border:0;margin:0;padding:0}
           <button type="button" data-period="2" aria-pressed="false">Next 12 months</button>
         </div>
         <div id="chart"></div>
+        <div class="ctip" id="ctip" hidden></div>
       </div>
       <div class="how" id="fine"></div>
       <div class="cta"><p>Want to see this with your club's real numbers? We'll walk you through it in 15 minutes.</p><a href="https://signupengine.io/contact-us/" target="_blank" rel="noopener">Talk to SignUpEngine</a></div>
@@ -374,8 +395,8 @@ fieldset.fl{border:0;margin:0;padding:0}
     <fieldset class="fl">
       <legend>Which report?</legend>
       <div class="pick">
-        <label><input type="radio" name="rtype" value="ltn"><span>Adult beginners</span></label>
-        <label><input type="radio" name="rtype" value="camp"><span>Summer camps</span></label>
+        <label><input type="radio" name="rtype" value="ltn"><span>Intro programs</span></label>
+        <label><input type="radio" name="rtype" value="camp"><span>Camps</span></label>
         <label><input type="radio" name="rtype" value="both"><span>Both programs</span></label>
       </div>
     </fieldset>
@@ -409,7 +430,7 @@ fieldset.fl{border:0;margin:0;padding:0}
   <div class="pv-bar"><div class="pv-bar-in">
     <div class="pv-ctl">
       <div class="seg" role="group" aria-label="Report">
-        <button type="button" data-rt="ltn">Adult beginners</button><button type="button" data-rt="camp">Summer camps</button><button type="button" data-rt="both">Both programs</button>
+        <button type="button" data-rt="ltn">Intro programs</button><button type="button" data-rt="camp">Camps</button><button type="button" data-rt="both">Both programs</button>
       </div>
     </div>
     <div class="pv-ctl">
@@ -424,7 +445,7 @@ fieldset.fl{border:0;margin:0;padding:0}
 </div>
 
 <script type="module">
-import {MONTHS, MON, PROGRAMS, DEFAULTS, REG_MONTHS, CAPPED, $, int, kfmt, calc as calcFor, combine, readInputs, hashParams as hashFor} from './lib/calc.js';
+import {MONTHS, MON, MON_FULL, PROGRAMS, DEFAULTS, REG_MONTHS, WHOLE, $, $p, int, kfmt, calc as calcFor, combine, breakEven, clampInput, readInputs, hashParams as hashFor} from './lib/calc.js';
 import {esc, isExample as isExampleFor, reportData, previewHTML} from './lib/report.js';
 
 const state = {tab:'ltn', view:'money', period:1, ltn:{...DEFAULTS.ltn}, camp:{...DEFAULTS.camp}};
@@ -444,11 +465,20 @@ function loadHash(){
 }
 
 /* ---------- inputs ---------- */
+const isWhole = k => WHOLE.includes(k);
+// number boxes show thousands commas, kept live while typing
+const groupInt = s => s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const showNum = (val, money) => { const s = money && !Number.isInteger(val) ? val.toFixed(2) : String(val); const [a,b] = s.split('.'); return groupInt(a) + (b!==undefined ? '.'+b : ''); };
+const readNum = s => +String(s).replace(/,/g,'');
+const numW = s => Math.max(1, s.replace(/[,.]/g,'').length + 0.4*(s.match(/[,.]/g)||[]).length);
+const isMoneyBox = n => n.parentElement.querySelector('.aff')?.textContent==='$';
+const sizeBox = n => { const w = numW(String(n.value)); if(n.closest('.tnum')) n.style.width = (w+0.4)+'ch'; else n.style.setProperty('--w', w); };
+const numAttrs = k => `type="text" autocomplete="off" ${isWhole(k)?'inputmode="numeric" data-whole':'inputmode="decimal"'}`;
 function ctlHTML(f, v){
   const val = v[f.key];
   return `<div class="ctl${f.row?' row':''}${f.wide?' wide':''}">
     <label for="n-${f.key}">${f.label}</label>
-    <div class="num">${f.pre?`<span class="aff">${f.pre}</span>`:''}<input type="number" id="n-${f.key}" data-key="${f.key}" min="${f.min}" step="${f.step}" value="${val}">${f.suf?`<span class="aff">${f.suf}</span>`:''}</div>
+    <div class="num">${f.pre?`<span class="aff">${f.pre}</span>`:''}<input class="nv" ${numAttrs(f.key)} id="n-${f.key}" data-key="${f.key}" value="${showNum(val, f.pre==='$')}">${f.suf?`<span class="aff">${f.suf}</span>`:''}</div>
     <input type="range" id="r-${f.key}" data-key="${f.key}" min="${f.min}" max="${Math.max(f.max,val)}" step="${f.step}" value="${val}" aria-label="${f.label}">
     ${f.hint?`<span class="hint">${f.hint}</span>`:''}
   </div>`;
@@ -456,9 +486,9 @@ function ctlHTML(f, v){
 function spendCtlHTML(f, v){
   const yr = v.spendMode!=='month', max = Math.max(yr?12000:1000, v.spend), step = yr?50:5;
   return `<div class="ctl wide">
-    <div class="ctl-head"><label for="n-spend">${state.tab==='camp'?'Year-round spend per kid':'What each player spends'}</label>
+    <div class="ctl-head"><label for="n-spend">${state.tab==='camp'?'Year-round spend per kid':'Regular programming spend per player'}</label>
       <div class="seg mini" role="group" aria-label="Spend entered as">${[['year','Per year'],['month','Per month']].map(([k,l])=>`<button type="button" data-spendmode="${k}" aria-pressed="${(yr?'year':'month')===k}">${l}</button>`).join('')}</div></div>
-    <div class="num"><span class="aff">$</span><input type="number" id="n-spend" data-key="spend" min="0" step="${step}" value="${v.spend}"></div>
+    <div class="num"><span class="aff">$</span><input class="nv" ${numAttrs('spend')} id="n-spend" data-key="spend" value="${showNum(v.spend, true)}"></div>
     <input type="range" id="r-spend" data-key="spend" min="0" max="${max}" step="${step}" value="${v.spend}" aria-label="What each one spends">
     <p class="hint-sm" id="spend-note"></p>
   </div>`;
@@ -468,10 +498,10 @@ function renderInputs(){
   if(state.tab==='both'){
     const blk = key => { const r = calc(key), v = r.v;
       return `<div class="ro"><h3>${PROGRAMS[key].name}<button class="ro-btn" type="button" data-goto="${key}">Edit</button></h3><dl>
-        <dt>${key==='ltn'?'New adults in 12 months':'Juniors who attend camp'}</dt><dd>${int(r.players)}</dd>
-        <dt>${key==='ltn'?'Price':r.existing?'More campers than last summer':'Full-Day / Half-Day per week'}</dt><dd>${key==='ltn'?$(v.price):r.existing?int(r.added):`${$(v.fprice)} / ${$(v.hprice)}`}</dd>
+        <dt>${key==='ltn'?'New players in 12 months':'Campers'}</dt><dd>${int(r.players)}</dd>
+        <dt>${key==='ltn'?(v.mode==='goal'?'Paid per new player':'Price'):r.existing?'More campers than last year':'Full-Day / Half-Day per week'}</dt><dd>${key==='ltn'?$(v.mode==='goal'?v.avgPrice:v.price):r.existing?int(r.added):`${$p(v.fprice)} / ${$p(v.hprice)}`}</dd>
         <dt>Total investment</dt><dd>${$(r.cost)}</dd>
-        <dt>${key==='ltn'?'Keep playing after the program':'Join year-round after camp'}</dt><dd>${v.keep}%</dd></dl></div>`; };
+        <dt>${key==='ltn'?'Move into regular programming':'Join year-round after camp'}</dt><dd>${key==='ltn'?Math.round(v.lvl2*v.keep/100):v.keep}%</dd></dl></div>`; };
     el.innerHTML = `<div class="ro-wrap">${blk('ltn')}${blk('camp')}</div><p class="fine" style="padding-top:12px">This view adds both programs together. Change the numbers on each program's tab.</p>`;
     el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.goto)));
     return;
@@ -479,10 +509,13 @@ function renderInputs(){
   const p = PROGRAMS[state.tab], v = state[state.tab];
   // for a camp they already run, year-round kids are counted only from the campers SignUpEngine added
   const relabel = f => (state.tab==='camp' && v.mode==='existing' && f.key==='keep')
-    ? {...f, label:'New campers who join a year-round program', hint:'Counted only from the campers you added over last summer'} : f;
+    ? {...f, label:'New campers who join a year-round program', hint:'Counted only from the campers you added over last year'} : f;
   const fs = g => p.fields.filter(f=>f.g===g).map(relabel).map(f=> f.key==='spend' ? spendCtlHTML(f,v) : ctlHTML(f,v)).join('');
   const CELL_LABEL = {fspots:'Full-Day spots per week', ffull:'Full-Day, how full', fprice:'Full-Day average price', hspots:'Half-Day spots per week', hfull:'Half-Day, how full', hprice:'Half-Day average price'};
-  const cell = (k, pre, suf, dis) => `<div class="num tnum${dis?' dis':''}">${pre?`<span class="aff">${pre}</span>`:''}<input type="number" id="n-${k}" data-key="${k}" min="0" value="${v[k]}" style="width:${String(v[k]).length+0.4}ch" ${dis?'disabled':''} aria-label="${CELL_LABEL[k]}">${suf?`<span class="aff">${suf}</span>`:''}</div>`;
+  const fld = k => p.fields.find(f=>f.key===k);
+  const goalCtls = () => ctlHTML(fld('goal'),v) + ctlHTML(fld('sessions'),v) + ctlHTML({...fld('avgPrice'), wide:true},v);
+  const startCtl = () => `<label class="startm">First session starts in <select id="start-month">${MON_FULL.map((m,i)=>`<option value="${i}"${v.start===i?' selected':''}>${m}</option>`).join('')}</select></label>`;
+  const cell = (k, pre, suf, dis) => `<div class="num tnum${dis?' dis':''}">${pre?`<span class="aff">${pre}</span>`:''}<input class="nv" ${numAttrs(k)} id="n-${k}" data-key="${k}" value="${showNum(v[k], pre==='$')}" style="width:${numW(showNum(v[k], pre==='$'))+0.4}ch" ${dis?'disabled':''} aria-label="${CELL_LABEL[k]}">${suf?`<span class="aff">${suf}</span>`:''}</div>`;
   const campTable = state.tab!=='camp' ? '' : `
     <div class="ctable" role="table" aria-label="Full-Day and Half-Day">
       <div class="trow th" role="row"><span>Per week</span><span>Spots</span><span>How full</span><span>Avg price</span></div>
@@ -490,19 +523,59 @@ function renderInputs(){
       <div class="trow" role="row"><span class="tl">Half-Day</span>${cell('hspots')}${cell('hfull','','%')}${cell('hprice','$')}</div>
     </div>`;
   el.innerHTML = `
-    <div class="grp"><h2>Your ${state.tab==='camp'?'camp':'program'}</h2>${state.tab==='camp'?`<div class="seg mode" role="group" aria-label="Camp type">
+    <div class="grp"><h2>Your ${state.tab==='camp'?'camp':'program'}</h2>${state.tab==='ltn'?`<div class="seg mode" role="group" aria-label="How to enter your program">
+        <button type="button" data-lmode="goal" aria-pressed="${v.mode==='goal'}">Set a player goal</button><button type="button" data-lmode="sessions" aria-pressed="${v.mode!=='goal'}">Enter your sessions</button></div>`:''}${state.tab==='camp'?`<div class="seg mode" role="group" aria-label="Camp type">
         <button type="button" data-cmode="new" aria-pressed="${v.mode!=='existing'}">New camp</button><button type="button" data-cmode="existing" aria-pressed="${v.mode==='existing'}">Camp you already run</button></div>`:''}
-      ${state.tab==='camp'&&v.mode==='existing' ? `<div class="ctls">${fs('x')}</div><div class="note" id="prog-note"></div>`
-        : `<div class="ctls">${fs('p')}</div>${campTable}<div class="note" id="prog-note"></div>`}${state.tab==='camp'?`<div class="ctls">${fs('e')}</div>`:''}</div>
+      ${state.tab==='ltn'&&v.mode==='goal' ? `<div class="ctls">${goalCtls()}</div><div class="note" id="prog-note"></div>`
+      : state.tab==='camp'&&v.mode==='existing' ? `<div class="ctls">${fs('x')}</div><div class="note" id="prog-note"></div>`
+        : `<div class="ctls">${fs('p')}</div>${campTable}<div class="note" id="prog-note"></div>`}${state.tab==='camp'?`<div class="ctls">${fs('e')}</div>`:''}${state.tab==='ltn'?startCtl():''}</div>
     <div class="grp"><h2>Your investment</h2><div class="ctls">${fs('c')}</div></div>
-    <div class="grp"><h2>${state.tab==='ltn'?'Players who stay':'After camp'}</h2><div class="ctls">${fs('s')}</div></div>
+    <div class="grp"><h2>${state.tab==='ltn'?'Players who stay':'After camp'}</h2><div class="ctls">${fs('s')}</div>${state.tab==='ltn'?'<div class="note path" id="path-note"></div>':''}</div>
     ${state.tab==='camp'?`<div class="grp" style="border-bottom:0"><h2>Next season</h2><div class="ctls">${fs('n')}</div></div>`:''}
     <button type="button" class="reset" id="reset">Reset example numbers</button>`;
+  // boxes take digits only (plus one decimal point in dollar boxes); commas are added for you.
+  // whole-number boxes never show a decimal point: anything typed after one is ignored, so 49.5 stays 49
+  el.querySelectorAll('input.nv').forEach(i=>{
+    const whole = i.hasAttribute('data-whole');
+    i.addEventListener('keydown',e=>{
+      const s = i.selectionStart, end = i.selectionEnd;
+      if(s!==end || s<i.value.length) i._frac = false;   // typing over a selection or mid-number starts fresh
+      // backspace or delete next to a comma removes the digit beside it, not just the comma
+      if(e.key==='Backspace' && s===end && i.value[s-1]===','){ i.setSelectionRange(s-1,s-1); }
+      if(e.key==='Delete' && s===end && i.value[s]===','){ i.setSelectionRange(s+1,s+1); }
+      if(e.key==='Backspace' || e.key==='Delete'){ i._frac = false; return; }
+      if(e.ctrlKey || e.metaKey || e.altKey || e.key.length!==1) return;
+      if(e.key==='.' && whole){ e.preventDefault(); i._frac = true; return; }
+      if(!/[0-9.]/.test(e.key)){ e.preventDefault(); return; }
+      if(i._frac){ e.preventDefault(); return; }
+    });
+    i.addEventListener('blur',()=>{ i._frac = false; });
+  });
+  // clean what's typed or pasted, add commas, and keep the cursor where it was
+  const tidy = n => {
+    const s = n.value, pos = n.selectionStart ?? s.length;
+    let before = s.slice(0,pos).replace(/[^0-9.]/g,'').length;
+    let raw = s.replace(/[^0-9.]/g,'');
+    if(n.hasAttribute('data-whole')) raw = raw.split('.')[0];
+    else { const d = raw.indexOf('.'); if(d>-1) raw = raw.slice(0,d+1) + raw.slice(d+1).replace(/\./g,'').slice(0,2); }
+    const lead = (raw.match(/^0+(?=\d)/)||[''])[0].length;
+    if(lead){ raw = raw.slice(lead); before = Math.max(0, before-lead); }
+    const [a,b] = raw.split('.');
+    const out = groupInt(a) + (raw.includes('.') ? '.'+(b||'') : '');
+    let c = 0, k = 0; while(k<out.length && c<before){ if(/[0-9.]/.test(out[k])) c++; k++; }
+    if(out!==s){ n.value = out; n.setSelectionRange(k,k); }
+    return raw;
+  };
+  // size each number to its value so its $ or % sits right beside it
+  el.querySelectorAll('input.nv').forEach(i=>sizeBox(i));
+  el.querySelectorAll('.num').forEach(b=>b.addEventListener('click',e=>{ if(e.target===b || e.target.classList.contains('aff')) b.querySelector('input').focus(); }));
+  el.querySelectorAll('[data-lmode]').forEach(b=>b.addEventListener('click',()=>{ v.mode = b.dataset.lmode; renderInputs(); renderResults(); }));
+  const sm = el.querySelector('#start-month'); if(sm) sm.addEventListener('change',()=>{ v.start = +sm.value; renderResults(); });
   el.querySelectorAll('[data-cmode]').forEach(b=>b.addEventListener('click',()=>{ v.mode = b.dataset.cmode; renderInputs(); renderResults(); }));
   el.querySelectorAll('input[type=range]').forEach(r=>r.addEventListener('input',()=>update(r.dataset.key, +r.value, 'range')));
-  el.querySelectorAll('input[type=number]').forEach(n=>{
-    n.addEventListener('input',()=>{ if(n.closest('.tnum')) n.style.width = (Math.max(1,n.value.length)+0.4)+'ch'; if(n.value!=='') update(n.dataset.key, +n.value, 'num'); });
-    n.addEventListener('change',()=>{ n.value = state[state.tab][n.dataset.key]; });
+  el.querySelectorAll('input.nv').forEach(n=>{
+    n.addEventListener('input',()=>{ const raw = tidy(n); sizeBox(n); if(raw!=='' && raw!=='.') update(n.dataset.key, +raw, 'num'); });
+    n.addEventListener('change',()=>{ n.value = showNum(state[state.tab][n.dataset.key], isMoneyBox(n)); sizeBox(n); });
   });
   el.querySelectorAll('[data-spendmode]').forEach(b=>b.addEventListener('click',()=>{
     const m = b.dataset.spendmode; if((v.spendMode||'year')===m) return;
@@ -513,14 +586,9 @@ function renderInputs(){
 }
 function update(key, val, from){
   const v = state[state.tab];
-  if(isNaN(val)) return;
-  const f = PROGRAMS[state.tab].fields.find(x=>x.key===key);
-  val = Math.max(f.min, val);
-  if(CAPPED.includes(key)) val = Math.min(f.max, val);
-  if(key==='wpc') val = Math.max(1, val);
-  if(key==='sessions') val = Math.max(1, Math.round(val));
-  // a camper can't average more weeks than the camp runs
-  if(state.tab==='camp' && key==='wpc') val = Math.min(v.sessions, val);
+  // every field stops at its limits, typed or dragged (the same limits a shared link or the email Worker uses)
+  val = clampInput(state.tab, key, val, v);
+  if(val===null) return;
   v[key] = val;
   syncCtl(key, val, from);
   if(state.tab==='camp' && key==='sessions' && v.wpc>val){ v.wpc = val; syncCtl('wpc', val); }
@@ -529,7 +597,8 @@ function update(key, val, from){
 function syncCtl(key, val, from){
   const r = document.getElementById('r-'+key), n = document.getElementById('n-'+key);
   if(r && from!=='range'){ if(+r.max < val) r.max = val; r.value = val; }
-  if(n && (from!=='num' || +n.value!==val)) n.value = val;
+  if(n && (from!=='num' || readNum(n.value)!==val)) n.value = showNum(val, isMoneyBox(n));
+  if(n) sizeBox(n);
 }
 
 /* ---------- results ---------- */
@@ -541,17 +610,24 @@ function niceScale(max, integer){
   if(integer) step = Math.max(1, Math.ceil(step));
   return {top: Math.ceil(max/step)*step, step};
 }
+// a small tennis ball: yellow-green ball with its two curved white seams
+function tennisBall(cx, cy, r){
+  const s = (dx) => `M${(cx+dx*r*0.62).toFixed(1)},${(cy-r*0.8).toFixed(1)} Q${(cx+dx*r*0.08).toFixed(1)},${cy} ${(cx+dx*r*0.62).toFixed(1)},${(cy+r*0.8).toFixed(1)}`;
+  return `<g><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--ball)" stroke="var(--ink)" stroke-opacity=".28" stroke-width="1"/>`
+    + `<path d="${s(-1)}" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/><path d="${s(1)}" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></g>`;
+}
 function lineChart(series, fmt, labels, yTitle, marks, integer, bands){
+  const N = labels.length;   // usually 12 months; 13 when a pre-launch period comes first
   const hasBands = bands && bands.length, hasMarks = marks && marks.length;
   // layout from the top: phase bands, then the axis title, then the plot
   const top = hasBands ? 42 : (hasMarks ? 40 : 0);
-  const W=760, L=58, R=110, B=46, T = top + 34, H = T + 238 + B;
+  const W=760, L=58, R=118, B = fmt.sessions ? 40 : 30, T = top + (yTitle ? 34 : 16), H = T + 238 + B;
   const vals = series.flatMap(s=>s.data.filter(v=>v!==null));
   const sc = niceScale(Math.max(...vals, 1), integer), maxV = sc.top;
-  const X = i => L + (W-L-R)*i/(MONTHS-1), Y = v => T + (H-T-B)*(1-v/maxV);
+  const X = i => L + (W-L-R)*i/(N-1), Y = v => T + (H-T-B)*(1-v/maxV);
   let g = '';
   for(let val=0; val<=maxV+1e-9; val+=sc.step){ const y=Y(val);
-    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="12" fill="var(--muted)">${fmt.axis(val)}</text>`; }
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="13" fill="var(--ink)" fill-opacity=".72">${fmt.axis(val)}</text>`; }
   if(hasBands){
     bands.forEach((bd,j)=>{ const x1 = Math.max(L, X(bd.a)), x2 = Math.min(W-R, X(bd.b));
       if(x2-x1<2) return;
@@ -568,27 +644,46 @@ function lineChart(series, fmt, labels, yTitle, marks, integer, bands){
       g += `<text x="${x}" y="${top-22}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--purple)">${short&&m.short?m.short:m.label}</text>`;
       g += `<text x="${x}" y="${top-8}" text-anchor="middle" font-size="11" fill="var(--muted)">+${int(m.add)}</text>`; });
   }
-  for(let i=0;i<MONTHS;i++) g += `<text x="${X(i)}" y="${H-26}" text-anchor="middle" font-size="12" fill="var(--muted)">${labels[i]}</text>`;
-  g += `<text x="${(L+W-R)/2}" y="${H-4}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">Month</text>`;
-  g += `<text x="4" y="${T-14}" text-anchor="start" font-size="13" font-weight="700" fill="var(--muted)">${yTitle}</text>`;
+  // a small tennis-ball dot under the axis in each month a session starts
+  if(fmt.sessions) fmt.sessions.forEach(i=>{ g += tennisBall(X(i), H-B+10, 6.5); });
+  for(let i=0;i<N;i++) g += `<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="${labels[i].length>4?11:13}" fill="var(--ink)" fill-opacity=".72">${labels[i]}</text>`;
+  if(yTitle) g += `<text x="4" y="${T-14}" text-anchor="start" font-size="13" font-weight="700" fill="var(--muted)">${yTitle}</text>`;
   const ends = [];
   series.forEach(s=>{
     const idx = s.data.map((v,i)=>v===null?-1:i).filter(i=>i>=0), last = idx[idx.length-1];
+    if(!idx.length) return;   // nothing to draw, e.g. no kids in year-round programs
     const pts = idx.map(i=>`${X(i).toFixed(1)},${Y(s.data[i]).toFixed(1)}`).join(' ');
     if(s.area) g += `<polygon points="${X(idx[0])},${Y(0)} ${pts} ${X(last)},${Y(0)}" fill="var(--tint)" opacity=".85"/>`;
     g += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="${s.dash?2.5:3}" stroke-linejoin="round" stroke-linecap="round"${s.dash?' stroke-dasharray="6 5"':''}/>`;
-    idx.forEach(i=>{ g += `<circle cx="${X(i)}" cy="${Y(s.data[i])}" r="${i===last?5:2.5}" fill="${s.color}"><title>${labels[i]}: ${fmt.val(s.data[i])}</title></circle>`; });
-    ends.push({x:X(last)+10, y:Y(s.data[last]), text:fmt.val(s.data[last])+(s.endLabel?` ${s.endLabel}`:''), color:s.color, mid:last<MONTHS-1});
+    idx.forEach(i=>{ g += `<circle cx="${X(i)}" cy="${Y(s.data[i])}" r="${i===last?5:2.5}" fill="${s.color}"/>`; });
+    ends.push({x:X(last)+10, y:Y(s.data[last]), text:(fmt.end||fmt.val)(s.data[last])+(s.endLabel?` ${s.endLabel}`:''), color:s.color, mid:last<N-1, v:s.data[last]});
   });
+  // break-even: where revenue so far first covers expenses so far
+  if(fmt.be!=null && fmt.be>=0){ const x = X(fmt.be), right = x > W-R-90;
+    g += `<line x1="${x}" x2="${x}" y1="${T-4}" y2="${H-B}" stroke="var(--yr)" stroke-width="2" stroke-dasharray="5 4"/>`;
+    g += `<text x="${right?x-6:x+6}" y="${T+10}" text-anchor="${right?'end':'start'}" font-size="13" font-weight="800" fill="var(--yr)">Break-even</text>`; }
   // keep end labels apart, stacking upward from the bottom so none sit on the month labels
   ends.forEach(e=>{ e.y = Math.min(e.y, Y(0)-6); });
-  ends.sort((a,b)=>b.y-a.y);
+  ends.sort((a,b)=>b.y-a.y || a.v-b.v);   // when labels share a spot, the smaller value goes underneath
   for(let i=1;i<ends.length;i++) for(let j=0;j<i;j++)   // check every label already placed, not just the previous one
     if(Math.abs(ends[i].x-ends[j].x)<60 && ends[j].y-ends[i].y<22){ ends[i].y = ends[j].y-22; j = -1; }
   ends.forEach(e=>{ g += `<text x="${e.x}" y="${e.mid?e.y-6:e.y+5}" text-anchor="start" font-size="14" font-weight="800" fill="${e.color}">${e.text}</text>`; });
+  // hover: a guide line plus one invisible column per month; the card itself is drawn in HTML
+  const step = (W-L-R)/(N-1);
+  g += `<line class="hl" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="3 3" visibility="hidden"/>`;
+  for(let i=0;i<N;i++) g += `<rect data-hi="${i}" x="${Math.max(0, X(i)-step/2)}" y="${T-10}" width="${step}" height="${H-B-T+10}" fill="transparent"/>`;
+  window.__ch = {W, H, X: Array.from({length:N},(_,i)=>X(i)), labels, series, fmt};
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Twelve months, month by month">${g}</svg>`;
 }
 
+// how registrations stack up against digital ad spend, stated honestly either way
+// (rest: Phase II and regular programming; only credited with the difference when they really cover it)
+function adsCovered(reg, ads, lead='', rest=0){
+  if(ads<=0.5) return lead;
+  const pre = lead ? lead+' ' : '';
+  return `${pre}Registration revenue of ${$(reg)} vs. ${$(ads)} in digital ad spend.${reg<ads && reg+rest>=ads?' Phase II and players who keep playing make up the difference.':''}`;
+}
+const kids = n => Math.round(n)===1 ? 'kid' : 'kids';
 function renderResults(){
   const both = state.tab==='both';
   const r = both ? combine(calc('ltn'), calc('camp')) : calc(state.tab);
@@ -598,48 +693,68 @@ function renderResults(){
   if(!both){
     const v = r.v, note = document.getElementById('prog-note');
     const c = r.campInfo;
-    if(r.camp && r.existing){ note.className = 'camp-sum'; note.innerHTML = `<div><b>${$(r.per)}</b><span>Revenue per camper last summer</span></div><div><b>${int(r.thisPlayers)}</b><span>Campers this summer (${r.thisPlayers-r.lastCampers>=0?'+':''}${int(r.thisPlayers-r.lastCampers)})</span></div>`; }
+    if(r.camp && r.existing){ note.className = 'camp-sum'; note.innerHTML = `<div><b>${$(r.per)}</b><span>Revenue per camper last year</span></div><div><b>${int(r.thisPlayers)}</b><span>Campers this year (${r.thisPlayers-r.lastCampers>=0?'+':''}${int(r.thisPlayers-r.lastCampers)})</span></div>`; }
     else if(r.camp){ note.className = 'camp-sum'; note.innerHTML = `<div><b>${int(c.weeks)}</b><span>Camper-weeks sold</span></div><div><b>${int(r.thisPlayers)}</b><span>Campers (at ${v.wpc} ${v.wpc===1?'week':'weeks'} each)</span></div>`; }
+    else if(v.mode==='goal') note.innerHTML = `To reach <b>${int(r.players)} new players</b>: ${v.sessions} ${v.sessions===1?'session':'sessions'} of about <b>${int(r.perSession)} players</b> each`;
     else note.innerHTML = `${v.sessions} sessions × ${int(r.perSession)} players (${v.full}% of ${v.spots}) = <b>${int(r.players)} new players in 12 months</b>`;
+    // the player path in plain numbers, so the chained percentages are easy to follow
+    const pn = document.getElementById('path-note');
+    if(pn && !r.camp){ const y1 = r.lvl2Players*v.keep/100;
+      pn.innerHTML = `<b>${int(r.players)}</b> new players <span>→</span> <b>${int(r.lvl2Players)}</b> in Phase II <span>→</span> <b>${int(y1)}</b> in regular programming`; }
     const sn = document.getElementById('spend-note');
     if(sn){ const yr = v.spendMode!=='month', mo$ = yr ? v.spend/12 : v.spend;
       sn.textContent = yr ? `= ${$(mo$)} a month` : `= ${$(v.spend*12)} a year`; }
   }
 
-  const p2 = state.period===2, span = p2 ? 'in the next 12 months' : 'in the first 12 months', endM = p2 ? 'month 24' : 'month 12';
+  const p2 = state.period===2, span = p2 ? 'in the next 12 months' : 'in the first 12 months', endM = p2 ? 'the end of the next 12 months' : 'the end of the first 12 months';
+  // break-even is shown for the Intro program's first 12 months only
+  const be = (!both && !r.camp && !p2) ? breakEven(r) : {i:-1, none:true};
+  const beTxt = be.none ? '' : be.i<0 ? 'Revenue doesn\u2019t cover expenses within these 12 months. '
+    : `${be.first?'Your first session pays for itself':'Revenue covers expenses'} by ${be.month}: ${$(be.rev)} in revenue so far vs. ${$(be.cost)} in expenses so far, including pre-launch. `;
   const spendMo = both ? null : (r.v.spendMode==='month' ? r.v.spend : r.v.spend/12);
   let regNote;
   if(both) regNote = `<b>${int(r.players)}</b> new players and campers across both programs`;
-  else if(r.camp) regNote = `<b>${int(r.season.fRegs)}</b> Full-Day weeks at ${$(r.v.fprice)}${r.season.hRegs>0?` + <b>${int(r.season.hRegs)}</b> Half-Day weeks at ${$(r.v.hprice)}`:''}`;
-  else regNote = r.free>0.5 ? `<b>${int(r.players)} new players</b>: <b>${int(r.paid)}</b> paid ${$(r.v.price)} and brought <b>${int(r.free)}</b> friends for free` : `<b>${int(r.players)} new players</b> at ${$(r.v.price)}`;
+  else if(r.camp) regNote = `<b>${int(r.season.fRegs)}</b> Full-Day weeks at ${$p(r.v.fprice)}${r.season.hRegs>0?` + <b>${int(r.season.hRegs)}</b> Half-Day weeks at ${$p(r.v.hprice)}`:''}`;
+  else if(r.v.mode==='goal') regNote = `<b>${int(r.players)} new players</b> at ${$p(r.v.avgPrice)} each`;
+  else regNote = r.free>0.5 ? `<b>${int(r.players)} new players</b>: <b>${int(r.paid)}</b> paid ${$p(r.v.price)} and brought <b>${int(r.free)}</b> friends for free` : `<b>${int(r.players)} new players</b> at ${$p(r.v.price)}`;
   const stayWho = both ? 'players and families' : who;
-  const spendTxt = both ? null : (r.v.spendMode==='month' ? `${$(r.v.spend)} a month` : `${$(r.v.spend)} a year`);
-  const keepTxt = both ? '' : (r.camp ? ` (${r.v.keep}% of ${int(r.players)} campers)` : ` (${r.v.keep}% of new ${who})`);
+  const spendTxt = both ? null : (r.v.spendMode==='month' ? `${$p(r.v.spend)} a month` : `${$p(r.v.spend)} a year`);
+  const keepTxt = both ? '' : (r.camp ? ` (${r.v.keep}% of ${int(r.players)} campers)` : ` (${r.v.keep}% of the ${int(r.lvl2Players)} in Phase II)`);
   const stayNote = p2
-    ? `<b>${int(r.carry)}</b> still playing from your first 12 months${both?'':` (${r.v.renew}% of ${int(r.y1Stayers)})`} + <b>${int(r.stayersEnd-r.carry)}</b> new${keepTxt}${spendTxt?`, at <b>${spendTxt}</b> each`:''}`
+    ? `<b>${int(r.y1Stayers)}</b> from your first 12 months${both?'':` (${r.v.renew}% renew at their one-year mark)`} + <b>${int(r.stayersEnd-r.carry)}</b> new${keepTxt}${spendTxt?`, at <b>${spendTxt}</b> each`:''}`
     : `<b>${int(r.stayersEnd)} ${stayWho}</b>${keepTxt}${spendTxt?` at <b>${spendTxt}</b> each`:''}, counted from when they join`;
   let costLabel = 'Total investment';
-  let costNote = both ? '' : p2 ? `No setup fee. ${$(r.v.fee)} a month for the platform and ${$(r.adsYear)} in digital ads` : `${$(r.setup)} setup, ${$(r.v.fee)} a month for the platform, and ${$(r.adsYear)} in digital ads`;
-  let regLabel = 'Registrations', stayLabel = `${both?'People':'Players'} who keep playing`, stayNoteOut = stayNote;
+  const adsTxt = both ? '' : r.camp ? `${$(r.adsYear)} in digital ads` : `${$(r.campaignAds)} in ads to promote ${r.v.sessions} ${r.v.sessions===1?'session':'sessions'}${r.listYear>0.5?`<br>${$p(r.v.listDay)}/day between sessions (${$(r.listYear)}/yr) to keep new players in the pipeline`:''}`;
+  let costNote = both ? '' : r.camp ? (p2 ? `No setup fee. ${$p(r.v.fee)} a month for SignUpEngine service, ${adsTxt}` : `${$(r.setup)} setup, ${$p(r.v.fee)} a month for SignUpEngine service, ${adsTxt}`)
+    : (p2 ? `No setup fee. ${$p(r.v.fee)}/mo service, ${adsTxt}` : `${$(r.setup)} setup, ${$p(r.v.fee)}/mo service (pre-launch + 12 months), ${adsTxt}`);
+  let regLabel = 'Registrations', stayLabel = both ? 'People who keep playing' : 'Regular programming', stayNoteOut = stayNote;
   let ledHead = `Your ${p2?'next':'first'} 12 months`;
   if(r.camp && !both){
     const sp = spendTxt ? `, at <b>${spendTxt}</b> each` : '';
     ledHead = p2 ? 'Next camp season' : 'This camp season';
-    regLabel = p2 ? 'Next summer\u2019s camp' : 'Camp registrations';
+    regLabel = p2 ? 'Next year\u2019s camp' : 'Camp registrations';
     if(p2) regNote += `<br>Up <b>${r.v.grow}%</b>: <b>${int(r.players)}</b> campers, <b>${int(r.returning)}</b> coming back + <b>${int(r.newCampers)}</b> new`;
     stayLabel = 'Kids in year-round programs';
+    // with very few kids, rounded counts wouldn't multiply out to the dollar figure, so leave them out
+    const fuzzy = n => n < 5 && Math.abs(n - Math.round(n)) > 0.01;
+    const vague = p2 ? (fuzzy(r.carry) || fuzzy(r.joinNew)) : fuzzy(r.joinNew);
     stayNoteOut = p2
-      ? `<b>${int(r.carry)}</b> kids still enrolled from this season (${r.v.renew}% of ${int(r.y1Stayers)}) all year + <b>${int(r.joinNew)}</b> new from September (${r.v.keep}% of ${int(r.newCampers)} new campers)${sp}`
-      : `<b>${int(r.joinNew)}</b> kids (${r.v.keep}% of ${int(r.thisPlayers)} campers) from September${sp}`;
+      ? (vague ? `Kids returning from this season (your ${r.v.renew}% retention estimate) all year, plus new ones from September (${r.v.keep}% of ${int(r.newCampers)} new campers)${sp}`
+        : `<b>${int(r.carry)}</b> ${kids(r.carry)} returning from this season (your ${r.v.renew}% retention estimate) all year + <b>${int(r.joinNew)}</b> new from September (${r.v.keep}% of ${int(r.newCampers)} new campers)${sp}`)
+      : (vague ? `${r.v.keep}% of ${int(r.thisPlayers)} campers, from September${sp}`
+        : `<b>${int(r.joinNew)}</b> ${kids(r.joinNew)} (${r.v.keep}% of ${int(r.thisPlayers)} campers) from September${sp}`);
     costNote = p2
       ? `No setup fee. Digital ads only need to find the ${int(r.newCampers)} new campers (${$(r.adsSeason)})`
-      : `${$(r.setup)} setup, ${$(r.v.fee)} a month for the platform, and ${$(r.adsSeason)} in digital ads`;
+      : `${$(r.setup)} setup, ${$p(r.v.fee)} a month for SignUpEngine service, and ${$(r.adsSeason)} in digital ads`;
     if(r.existing){
-      regLabel = 'Growth over last summer';
-      regNote = `<b>${int(r.added)}</b> more campers than last summer, at about <b>${$(r.per)}</b> each. Camp revenue goes from ${$(r.lastRev)} to <b>${$(r.totalRev)}</b>`;
+      const base = p2 ? 'the year before SignUpEngine' : 'last year';
+      regLabel = p2 ? 'Growth since the year before SignUpEngine' : 'Growth over last year';
+      regNote = `<b>${int(r.added)}</b> more campers than ${base}, at about <b>${$(r.per)}</b> each. Camp revenue goes from ${$(r.lastRev)} to <b>${$(r.totalRev)}</b>`;
       stayNoteOut = p2
-        ? `<b>${int(r.carry)}</b> kids still enrolled from this season all year + <b>${int(r.joinNew)}</b> new from September${sp}`
-        : `<b>${int(r.joinNew)}</b> of your ${int(r.added)} new campers (${r.v.keep}%) join from September${sp}`;
+        ? (vague ? `Kids from your new campers: those returning from this season all year, plus new ones from September${sp}`
+          : `<b>${int(r.carry)}</b> ${kids(r.carry)} returning from this season all year + <b>${int(r.joinNew)}</b> new from September${sp}`)
+        : (vague ? `${r.v.keep}% of your ${int(r.added)} new campers, from September${sp}`
+          : `<b>${int(r.joinNew)}</b> of your ${int(r.added)} new campers (${r.v.keep}%) join from September${sp}`);
     }
   }
   const row = (label, note, val, cls='') => `<div class="row ${cls}"><div class="lab">${label}${note?`<small>${note}</small>`:''}</div><div class="val">${val}</div></div>`;
@@ -651,12 +766,13 @@ function renderResults(){
     <div class="ledger">
       <div class="led-h">${ledHead}</div>
       ${both ? [
-        row('Adult beginner program', `<b>${int(r.a.players)}</b> adults register`, $(r.a.regRev)),
-        row(r.b.existing?'Summer camp growth':'Summer camps', r.b.existing?`<b>${int(r.b.added)}</b> more campers than last summer`:`<b>${int(r.b.players)}</b> juniors attend camp`, $(r.b.regRev)),
-        row('Adults who keep playing', `<b>${int(r.a.stayersEnd)}</b> adults by the end of the 12 months`, $(r.a.stayYear)),
-        row('Juniors in year-round programs', `<b>${int(r.b.stayersEnd)}</b> kids by December`, $(r.b.stayYear))
-      ].join('') : row(regLabel, regNote, $(r.regRev)) + row(stayLabel, stayNoteOut, $(r.stayYear))}
-      ${row(costLabel, both ? (p2 ? 'No setup fees. The platform and digital ads for both programs' : r.setup>0 ? `${$(r.setup)} setup, plus the platform and digital ads for both programs` : 'The platform and digital ads for both programs') : costNote, $(-r.cost), 'out')}
+        row('Intro program', `<b>${int(r.a.players)}</b> players register${r.a.lvl2Rev>0.5?`, ${int(r.a.lvl2Players)} go on to Phase II`:''}`, $(r.a.regRev+r.a.lvl2Rev)),
+        row(r.b.existing?'Camp growth':'Camps', r.b.existing?`<b>${int(r.b.added)}</b> more campers than last year`:`<b>${int(r.b.players)}</b> campers attend`, $(r.b.regRev)),
+        row('Players in regular programming', `<b>${int(r.a.stayersEnd)}</b> players by the end of the 12 months`, $(r.a.stayYear)),
+        row('Campers in year-round programs', `<b>${int(r.b.stayersEnd)}</b> kids by December`, $(r.b.stayYear))
+      ].join('') : row(regLabel, regNote, $(r.regRev)) + (!r.camp && r.lvl2Rev>0.5 ? row('Phase II program', `<b>${int(r.lvl2Players)}</b> players (${r.v.lvl2}%) go on at ${$p(r.v.lvl2Price)} each`, $(r.lvl2Rev)) : '') + row(stayLabel, stayNoteOut, $(r.stayYear))}
+      ${row(costLabel, both ? (p2 ? 'No setup fees. SignUpEngine service and digital ads for both programs' : r.setup>0 ? `${$(r.setup)} setup, plus SignUpEngine service and digital ads for both programs` : 'SignUpEngine service and digital ads for both programs') : costNote, $(-r.cost), 'out')}
+      ${be.none ? '' : row('Break-even', be.i>=0 ? (be.first ? 'Your first session pays for itself' : '') : 'Not within these 12 months', be.i>=0 ? be.month[0].toUpperCase()+be.month.slice(1) : '\u2013')}
       ${row(profit>=0?'You come out ahead':'You come out behind', '', $(Math.abs(profit)), 'total')}
     </div>`;
   // announce just the bottom line, once the numbers stop changing
@@ -664,7 +780,7 @@ function renderResults(){
   liveTimer = setTimeout(()=>{ document.getElementById('live').textContent =
     `${ret===null?'No costs entered.':`Return ${ret.toFixed(2)}x.`} You come out ${profit>=0?'ahead':'behind'} by ${$(Math.abs(profit))}.`; }, 700);
 
-  const labels = (!both && r.camp) ? MON : Array.from({length:MONTHS},(_,i)=>String(i+1+(p2?12:0)));
+  const labels = (!both && r.camp) ? MON : Array.from({length:MONTHS},(_,i)=>MON[((both?0:r.v.start||0)+i)%12]);
   const mo = r.mo;
   if(both){
     const A = r.a, Bc = r.b;
@@ -676,19 +792,19 @@ function renderResults(){
     state.period = saved;
     const costL = 'Total investment';
     const groups = state.view==='money' ? [
-      {name:'Adult beginner program', rk:'a', bars:[{label:'Revenue generated', v:A.totalIn, c:'var(--purple)'}, {label:costL, v:A.cost, c:'var(--blue)'}]},
-      {name:'Summer camps (juniors)', rk:'b', bars:[{label:'Revenue generated', v:Bc.totalIn, c:'var(--purple)'}, {label:costL, v:Bc.cost, c:'var(--blue)'}]},
+      {name:'Intro program', rk:'a', bars:[{label:'Revenue generated', v:A.totalIn, c:'var(--purple)'}, {label:costL, v:A.cost, c:'var(--blue)'}]},
+      {name:'Camps', rk:'b', bars:[{label:'Revenue generated', v:Bc.totalIn, c:'var(--purple)'}, {label:costL, v:Bc.cost, c:'var(--blue)'}]},
       {name:'Both programs', total:true, rk:'t', bars:[{label:'Revenue generated', v:r.totalIn, c:'var(--purple)'}, {label:costL, v:r.cost, c:'var(--blue)'}]}
     ] : [
-      {name:'Adult beginner program', bars:[{label:'Registered', v:A.players, c:'var(--soft)'}, {label:'Keep playing', v:A.stayersEnd, c:'var(--purple)'}]},
-      {name:'Summer camps (juniors)', bars:[{label:'Registered', v:Bc.players, c:'var(--soft)'}, {label:'In year-round programs', v:Bc.stayersEnd, c:'var(--purple)'}]}
+      {name:'Intro program', bars:[{label:'Registered', v:A.players, c:'var(--soft)'}, {label:'Keep playing', v:A.stayersEnd, c:'var(--purple)'}]},
+      {name:'Camps', bars:[{label:'Registered', v:Bc.players, c:'var(--soft)'}, {label:'In year-round programs', v:Bc.stayersEnd, c:'var(--purple)'}]}
     ];
     const fmt = state.view==='money' ? $ : int;
     const max = Math.max(1, ...groups.flatMap(g=>g.bars.map(b=>b.v)));
-    document.getElementById('aha').textContent = state.view==='money' ? 'Adults and juniors each pay for themselves.' : 'Adults and juniors, side by side.';
+    document.getElementById('aha').textContent = state.view==='money' && A.totalIn>=A.cost && Bc.totalIn>=Bc.cost ? 'Each program pays for itself.' : 'Both programs, side by side.';
     document.getElementById('cap').textContent = state.view==='money'
-      ? `Registrations plus players who keep playing, against what each program costs ${span}.`
-      : `How many adults and juniors register ${span}, and how many keep playing.`;
+      ? `What each program brings in ${span.replace(/^in /,'during ')}, against its investment.`
+      : `How many players and campers register ${span}, and how many keep playing.`;
     document.getElementById('legend').innerHTML = state.view==='money'
       ? `<span><i style="background:var(--purple)"></i>Revenue generated</span><span><i style="background:var(--blue)"></i>${costL}</span>`
       : `<span><i style="background:var(--soft)"></i>Registered</span><span><i style="background:var(--purple)"></i>Keep playing</span>`;
@@ -699,65 +815,86 @@ function renderResults(){
   } else if(state.view==='money'){
     const fee = both ? r.fee : r.v.fee;
     const setup = r.setup;
+    // camps are seasonal, so their chart shows running totals: the money comes in by summer,
+    // while the monthly fee is spread across the year
+    const run = a => { let t = 0; return a.map(v=>t+=v); };
+    const cum = r.camp && !both ? {
+      rev: run(mo.map(x=>x.inn)), camp: run(mo.map(x=>x.inn - x.stay)), yr: run(mo.map(x=>x.stay)),
+      cost: run(mo.map(x=>x.cost)), fee: run(mo.map(x=>x.fee)), ads: run(mo.map(x=>x.ads)), setup: run(mo.map(x=>x.setup))
+    } : null;
     if(r.camp && !both){
-      const yrMo = mo[MONTHS-1].stay;
-      const moCost = mo[MONTHS-1].cost;
-      document.getElementById('aha').textContent = r.existing ? 'Every month runs ahead of last summer.' : 'Camp pays first. Year-round programs keep paying.';
-      document.getElementById('cap').textContent = r.existing ? `The gap between the two camp lines is your growth: ${$(r.regRev)} more than last summer${p2?', before SignUpEngine':''}.${yrMo>0.5?` After camp, kids from your new campers bring in ${$(yrMo)} a month in year-round programs.`:''}` : `Camp registrations stop when camp ends.${yrMo>0.5?` After that, kids in year-round programs bring in ${$(yrMo)} a month${yrMo>moCost?`, well above the ${$(moCost)} you invest`:''}.`:''}`;
+      const yrMo = mo[MONTHS-1].stay, aug = REG_MONTHS-1, end = MONTHS-1;
+      document.getElementById('aha').textContent = cum.yr[end]>0.5 ? 'Camp pays first. Year-round programs keep paying.' : 'Camp pays for the year.';
+      document.getElementById('cap').textContent = (r.existing
+        ? `Counts only growth over ${p2?'the year before SignUpEngine':'last year'}. `
+        : '') + `By the end of August, ${r.existing?'added revenue':'revenue'} reaches ${$(cum.rev[aug])} against ${$(cum.cost[aug])} invested.${yrMo>0.5?` After camp, year-round programs add ${$(yrMo)} a month.`:''} By December, it's ${$(cum.rev[end])} against ${$(cum.cost[end])}.`;
     } else {
-      document.getElementById('aha').textContent = 'Your investment stays flat. Revenue keeps growing.';
-      document.getElementById('cap').textContent = `You invest about ${$(r.avgCost)} a month in the platform and digital ads.`;
+      document.getElementById('aha').textContent = 'Revenue keeps climbing after every session.';
+      document.getElementById('cap').textContent = beTxt || (p2 && r.y1Stayers>0.5 ? `Picks up where your first 12 months ended, with ${int(r.y1Stayers)} players already in regular programming. Each session adds more.` : adsCovered(r.regRev, r.adsYear, 'Ad spending rises before each session and drops between them.', r.lvl2Rev + r.stayYear));
     }
     const campView = r.camp && !both;
     document.getElementById('legend').innerHTML = campView
-      ? `<span><i style="background:var(--purple)"></i>${r.existing?'This summer\u2019s camp registrations':'Camp registrations'}</span>${r.existing?`<span><i style="background:repeating-linear-gradient(90deg,var(--muted) 0 6px,transparent 6px 10px)"></i>Last summer</span>`:''}<span><i style="background:var(--yr)"></i>Year-round programs</span><span><i style="background:var(--blue)"></i>Your investment</span>`
-      : `<span><i style="background:var(--purple)"></i>What comes in each month</span><span><i style="background:var(--blue)"></i>Your investment each month</span>`;
+      ? `<span><i style="background:var(--purple)"></i>${r.existing?'Added revenue so far':'Revenue so far'}</span><span><i style="background:var(--blue)"></i>Expenses so far</span>`
+      : `<span><i style="background:var(--purple)"></i>Revenue each month</span><span><i style="background:var(--blue)"></i>Expenses each month</span><span><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${tennisBall(7,7,6)}</svg>Session starts</span>`;
     const series = campView ? [
-      {data: mo.map((x,i)=>i<REG_MONTHS ? (r.existing ? x.campTotal : x.campRev) : null), color:'var(--purple)', area:true},
-      ...(r.existing ? [{data: mo.map((x,i)=>i<REG_MONTHS ? x.campLast : null), color:'var(--muted)', dash:true}] : []),
-      {data: mo.map(x=>x.stay>0.5 ? x.stay : null), color:'var(--yr)'},
-      {data: mo.map(x=>x.cost), color:'var(--blue)'}
+      {name: r.existing ? 'Added revenue so far' : 'Revenue so far', data: cum.rev, color:'var(--purple)', area:true,
+        parts: mo.map((_,i)=>[['Camp registrations',cum.camp[i]],...(cum.yr[i]>0.5?[['Year-round programs',cum.yr[i]]]:[])])},
+      {name:'Expenses so far', data: cum.cost, color:'var(--blue)',
+        parts: mo.map((_,i)=>[['SignUpEngine service',cum.fee[i]],['Digital ads',cum.ads[i]],...(cum.setup[i]>0.5?[['One-time setup',cum.setup[i]]]:[])])}
     ] : [
-      {data: mo.map(x=>x.inn), color:'var(--purple)', area:true},
-      {data: mo.map(x=>x.cost), color:'var(--blue)'}
+      {name:'Revenue', data: [...(r.pre?[r.pre]:[]), ...mo].map(x=>x.inn), color:'var(--purple)', area:true},
+      {name:'Expenses', data: [...(r.pre?[r.pre]:[]), ...mo].map(x=>x.cost), color:'var(--blue)', parts: [...(r.pre?[r.pre]:[]), ...mo].map(x=>[['SignUpEngine service',x.fee],['Digital ads',x.ads],...(x.setup>0.5?[['One-time setup',x.setup]]:[])])}
     ];
-    document.getElementById('chart').innerHTML = lineChart(series, {axis:kfmt, val:$}, labels, 'Dollars per month', null, false, r.bands);
+    // one-line reasons for the bumps, shown in the hover card
+    const notes = Array(MONTHS).fill('').map(()=>[]);
+    if(!campView) (r.campaigns||[]).forEach((c,i)=>{
+      const sm = MON_FULL[((r.v.start||0)+c.m)%12];
+      notes[c.m].push(i===0 && r.pre ? 'Session 1 registrations come in' : `Session ${i+1} starts`);
+      if(i===0 && r.pre) return;   // the first session's ads are part of the pre-launch
+      notes[c.peak].push(i===0 ? 'Ads for Session 1' : `Ads for the ${sm} session`); });
+    if(!campView && r.pre && r.lvl2Rev>0.5) notes[1].push('Session 1 players start Phase II');
+    const preN = !campView && r.pre;
+    const chartNotes = (preN ? ['Setup, first month and Session 1 ads'] : []).concat(notes.map(n=>n.join('<br>')));
+    document.getElementById('chart').innerHTML = lineChart(series, {axis:kfmt, val:$, end: campView ? $ : x=>$(x)+'/mo', thru: campView, notes: chartNotes, sessions: campView ? null : (r.campaigns||[]).map(c=>c.m + (preN?1:0)), be: be.i, net: !campView ? (()=>{ let t = 0; return series[0].data.map((v,k)=> t += v - series[1].data[k]); })() : null}, preN ? ['Pre-launch', ...labels] : labels, '', null, false, r.bands);
   } else if(!both){
-    document.getElementById('aha').textContent = r.camp&&!both ? 'Campers register. Many move into year-round programs.' : 'New players keep adding up.';
-    if(r.camp && !both) document.getElementById('cap').textContent = `${int(r.players)} campers register from January through August${r.existing?`, ${int(r.added)} more than last summer`:''}${p2?` (${int(r.returning)} coming back)`:''}, and ${int(r.stayersEnd)} kids are in year-round programs by December.`;
+    document.getElementById('aha').textContent = r.camp&&!both ? (r.stayersEnd>=0.5 ? 'Campers register. Some move into year-round programs.' : 'Campers register.') : 'New players keep adding up.';
+    if(r.camp && !both) document.getElementById('cap').textContent = `${int(r.players)} campers register from January through August${r.existing?`, ${int(r.added)} more than ${p2?'the year before SignUpEngine':'last year'}`:''}${p2?` (${int(r.returning)} coming back)`:''}${r.stayersEnd>=0.5?`, and ${int(r.stayersEnd)} ${kids(r.stayersEnd)} ${Math.round(r.stayersEnd)===1?'is':'are'} in year-round programs by December`:''}.`;
     else document.getElementById('cap').textContent = `${int(r.players)} new ${both?'players and campers':who} come through your club ${span}, and ${int(r.stayersEnd)} are playing by ${endM}${p2?`, including ${int(r.carry)} from your first 12 months`:''}.`;
     document.getElementById('legend').innerHTML = r.camp&&!both
       ? `<span><i style="background:var(--soft)"></i>Campers registered, running total</span><span><i style="background:var(--purple)"></i>Kids in year-round programs</span>`
       : `<span><i style="background:var(--soft)"></i>New ${both?'players':who} brought in, running total</span><span><i style="background:var(--purple)"></i>Still playing at your club</span>`;
     document.getElementById('chart').innerHTML = lineChart([
-      {data: r.camp&&!both ? mo.map((x,i)=>i<REG_MONTHS?x.players:null) : mo.map(x=>x.players), color:'var(--soft)', endLabel: r.camp&&!both?'registered':''},
-      {data: mo.map(x=>x.stayers), color:'var(--purple)', area:true}
-    ], {axis:v=>int(v), val:int}, labels, r.camp?'Campers and program kids':'Players', r.bands?null:r.marks, true, r.bands);
+      {name: r.camp ? 'Campers registered' : 'New players so far', data: r.camp&&!both ? mo.map((x,i)=>i<REG_MONTHS?x.players:null) : mo.map(x=>x.players), color:'var(--soft)', endLabel: r.camp&&!both?'registered':''},
+      {name: r.camp ? 'In year-round programs' : 'Still playing', data: mo.map(x=>x.stayers), color:'var(--purple)', area:true}
+    ], {axis:v=>int(v), val:int}, labels, '', r.bands?null:r.marks, true, r.bands);
   }
+  if(both) window.__ch = null;
+  document.getElementById('ctip').hidden = true;
   const unit = both ? 'program' : PROGRAMS[state.tab].session.replace('camp week','camp');
   const whoCap = both ? 'People' : who[0].toUpperCase()+who.slice(1);
   if(both){
     document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
     <li>This adds both programs together, using the numbers on each program's tab.</li>
     <li>Each program has its own ${p2?'':'setup, '}ads and monthly fee.</li>
-    <li>Revenue generated includes registrations plus what adults and juniors who keep playing spend.</li>
-    <li>The adult program counts 12 months from its first session. Camps follow the calendar year, from January registration through December.</li></ul>`;
+    <li>Revenue generated includes registrations, the Phase II program, and what players and campers who keep playing spend.</li>
+    <li>The Intro program counts 12 months from its first session. Camps follow the calendar year, from January registration through December.</li></ul>`;
     return;
   }
   if(r.camp && !both){
     document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
-    <li>${r.v.early}% of campers sign up in January with the early bird. The rest register through August, tapering off as camp fills. Digital ads follow the same pattern.</li>
-    <li>Kids who move into year-round programs start spending in September.${p2?' Kids still enrolled from this season spend all year.':''}</li>
+    <li>${r.v.early}% of campers sign up in January with the early bird. The rest register through August, tapering off as camp approaches. Digital ads follow the same pattern.</li>
+    <li>Kids who move into year-round programs start spending in September.${p2?' Kids returning from this season spend all year.':''}</li>
     <li>${p2?`Next season grows ${r.v.grow}%. Returning campers fill part of it, so ads only need to find new campers. There is no setup fee.`:'Setup is counted once, in January.'}</li>
-    ${r.existing?`<li>Because you already run this camp, only growth over last summer counts toward your return: ${int(r.added)} more campers at about ${$(r.per)} each. Year-round programs count only kids from those new campers.</li>`:''}</ul>`;
+    ${r.existing?`<li>Because you already run this camp, only growth over ${p2?'the year before SignUpEngine':'last year'} counts toward your return: ${int(r.added)} more campers at about ${$(r.per)} each. Year-round programs count only kids from those new campers.</li>`:''}</ul>`;
     return;
   }
   document.getElementById('fine').innerHTML = `<h3>How this works</h3><ul>
     <li>${p2
-      ? `The next 12 months has no setup fee, the same sessions run again, and ${both?'each program\u2019s \u201cStill playing the next year\u201d share':`${state[state.tab].renew}%`} of ${both?'its':'the'} players who stayed are still playing.`
+      ? `The next 12 months has no setup fee, and the same sessions run again. Players from your first 12 months keep playing until their one-year mark, when your ${state[state.tab].renew}% retention estimate applies.`
       : 'All numbers are for your first 12 months, using the example numbers until you enter your own.'}</li>
-    <li>Registrations, ads and the monthly fee are averaged across the 12 months.${p2?'':' Setup is counted once, in month 1.'}</li>
-    <li>${whoCap} who stay start spending the month after their ${unit}.</li></ul>`;
+    <li>${p2?'':'A pre-launch period of about 6 weeks comes first: setup, your first month and the first session\u2019s ads. '}Each session\u2019s registrations count in the month it starts, and its Phase II the month after.</li>
+    <li>Digital ads run 6 weeks before each session, then drop to ${$p(state[state.tab].listDay||0)} a day to build your first-to-know list.${p2?' The first session\u2019s ads show in month 1.':''}</li>
+    <li>${both?`${whoCap} who stay start spending the month after their ${unit}.`:'Players start Phase II the month after their session, and regular programming the month after that.'}</li></ul>`;
 }
 
 function setTab(t){
@@ -788,6 +925,33 @@ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',(
   renderResults();
 }));
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+// hover (or tap) card for the line charts
+(function(){
+  const chartEl = document.getElementById('chart'), tip = document.getElementById('ctip'), card = chartEl.closest('.chart-card');
+  const hide = () => { tip.hidden = true; const hl = chartEl.querySelector('.hl'); if(hl) hl.setAttribute('visibility','hidden'); };
+  const show = e => {
+    const h = e.target.closest && e.target.closest('[data-hi]'), d = window.__ch;
+    if(!h || !d) return hide();
+    const i = +h.dataset.hi, svg = chartEl.querySelector('svg'), rc = svg.getBoundingClientRect(), cr = card.getBoundingClientRect();
+    const mi = MON.indexOf(d.labels[i]), month = mi>=0 ? MON_FULL[mi] : d.labels[i];
+    const rows = d.series.filter(sr=>sr.data[i]!==null && sr.data[i]!==undefined)
+      .map(sr=>`<div class="r"><span><i style="background:${sr.color}"></i>${sr.name||''}</span><strong>${d.fmt.val(sr.data[i])}</strong></div>`
+        + (sr.parts ? sr.parts[i].map(([l,v])=>`<div class="r sub"><span>${l}</span><span>${d.fmt.val(v)}</span></div>`).join('') : '')).join('');
+    const note = d.fmt.notes && d.fmt.notes[i] ? `<div class="n" style="white-space:nowrap">${d.fmt.notes[i]}</div>` : '';
+    // net so far: everything that has come in minus everything spent, through this month
+    const nv = d.fmt.net ? d.fmt.net[i] : null;
+    const net = nv==null ? '' : `<div class="r net"><span>Net so far</span><strong style="color:var(${nv<-0.5?'--neg':'--yr'})">${nv<-0.5?'\u2212':'+'}${$(Math.abs(nv))}</strong></div>`;
+    tip.innerHTML = `<b>${d.fmt.thru?'Through ':''}${month}</b>${rows}${net}${note}`; tip.hidden = false;
+    const x = rc.left - cr.left + d.X[i]/d.W*rc.width, tw = tip.offsetWidth, th = tip.offsetHeight;
+    const left = x + 14 + tw > cr.width ? x - 14 - tw : x + 14;
+    const top = Math.max(4, Math.min(e.clientY - cr.top - th/2, cr.height - th - 4));
+    tip.style.left = Math.max(4, left)+'px'; tip.style.top = top+'px';
+    const hl = svg.querySelector('.hl'); hl.setAttribute('x1', d.X[i]); hl.setAttribute('x2', d.X[i]); hl.setAttribute('visibility','visible');
+  };
+  chartEl.addEventListener('pointermove', show);
+  chartEl.addEventListener('pointerdown', show);
+  chartEl.addEventListener('pointerleave', hide);
+})();
 
 /* ---------- emailed report ---------- */
 // The server endpoint that emails the report. Until it exists, "Email me this report" becomes
@@ -816,7 +980,7 @@ const ov = document.getElementById('report-ov'), form = document.getElementById(
 function exWarn(){ const t = form.querySelector('[name=rtype]:checked')?.value || state.tab;
   const ex = (t==='both' ? ['ltn','camp'] : [t]).filter(isExample), w = document.getElementById('ex-warn');
   w.hidden = !ex.length;
-  w.textContent = `You're still using our example numbers${t==='both'&&ex.length===1?` for ${ex[0]==='ltn'?'the adult beginner program':'summer camps'}`:''}, so the report will say so. Change them in the calculator first for a report about your club.`; }
+  w.textContent = `You're still using our example numbers${t==='both'&&ex.length===1?` for ${ex[0]==='ltn'?'the intro program':'camps'}`:''}, so the report will say so. Change them in the calculator first for a report about your club.`; }
 form.querySelectorAll('[name=rtype]').forEach(r=>r.addEventListener('change', exWarn));
 const openBtn = document.getElementById('open-report');
 let opener = null;   // where focus goes back to when the form or preview closes

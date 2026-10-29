@@ -86,7 +86,7 @@ function buildEmails(env, f){
 
   // 3. the lead, to Peter; replying goes straight to the person who asked
   const row = (k, v) => `<tr><td style="padding:3px 12px 3px 0;color:#675e73;vertical-align:top;white-space:nowrap">${k}</td><td style="padding:3px 0">${v}</td></tr>`;
-  const typeName = {ltn:'Adult beginners', camp:'Summer camps', both:'Both programs'}[f.type];
+  const typeName = {ltn:'Intro programs', camp:'Camps', both:'Both programs'}[f.type];
   const leadHTML = `<b>New ROI calculator report request</b><table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:8px;font-size:14px">
     ${row('Name', esc(f.name))}${row('Club', esc(f.club))}${row('Email', `<a href="mailto:${esc(f.email)}">${esc(f.email)}</a>`)}
     ${row('Role', esc(f.role || 'Not given'))}${row('Report', typeName)}${row('Colleagues', f.cc.length ? esc(f.cc.join(', ')) : 'None')}
